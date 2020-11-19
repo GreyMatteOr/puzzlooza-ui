@@ -12,18 +12,31 @@ class Puzzle extends Component {
     }
   }
 
-  createTiles() {
-    let dx = 100, dy = 100, tiles = [];
-    for (let y = 0; y < this.state.puzzleImg.height; y += dy) {
-      for (let x = 0; x < this.state.puzzleImg.width; x += dx) {
+  createTiles(xSplits, ySplits) {
+    let {width, height} = this.state.puzzleImg;
+    let dx = Math.floor( width / xSplits );
+    let dy = Math.floor( height / ySplits );
+    let xLeftover = width % dx
+    let yLeftover = height % dy
+    let xOffset, yOffset, tiles = [];
+    for (let y = 0; y < ySplits; y++) {
+      for (let x = 0; x < xSplits; x++) {
+        if (xLeftover) {
+          xOffset = x;
+          xLeftover--;
+        }
+        if (yLeftover) {
+          yOffset = y;
+          yLeftover--;
+        }
         let tile = (
           <Tile
             dx={dx}
             dy={dy}
             image={this.state.puzzleImg}
             key={`${x},${y}`}
-            x={x}
-            y={y}
+            x= { (x * dx) + xOffset }
+            y= { (y * dy) + yOffset }
           />
         )
 
@@ -55,7 +68,7 @@ class Puzzle extends Component {
 
     return (
       <>
-        {this.createTiles()}
+        {this.createTiles(9, 6)}
       </>
     )
   }

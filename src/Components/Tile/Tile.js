@@ -1,19 +1,15 @@
 import React, { Component } from 'react';
 import './Tile.css';
 
-
 class Tile extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      x: null,
-      y: null
     }
     this.canvas = React.createRef();
   }
 
   drawTile( canvas ) {
-    console.log(canvas)
     let ctx = canvas.getContext('2d');
     let {dx, dy, image, x, y} = this.props;
     ctx.drawImage(image, x, y, dx, dy, 0, 0, 300, 150);
