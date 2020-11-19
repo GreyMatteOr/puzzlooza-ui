@@ -15,9 +15,8 @@ class Tile extends Component {
   drawTile( canvas ) {
     console.log(canvas)
     let ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'green';
-    // ctx.drawImage(this.puzzleImg, +x, +y, +dx, +dy);
-    ctx.fillRect(0,0,100,100)
+    let {dx, dy, image, x, y} = this.props;
+    ctx.drawImage(image, x, y, dx, dy, 0, 0, 300, 150);
   }
 
   componentDidMount() {
@@ -25,7 +24,15 @@ class Tile extends Component {
   }
 
   render() {
-    return <canvas ref={this.canvas}></canvas>
+    return <canvas
+      ref={this.canvas}
+      style={{
+        width: "100px",
+        height: "100px",
+        borderColor: "black",
+        borderStyle: "double"
+      }}>
+    </canvas>
   }
 
 }

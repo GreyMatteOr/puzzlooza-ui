@@ -14,8 +14,8 @@ class Puzzle extends Component {
 
   createTiles() {
     let dx = 100, dy = 100, tiles = [];
-    for (let x = 0; x < this.state.puzzleImg.width; x += dx) {
-      for (let y = 0; y < this.state.puzzleImg.height; y += dy) {
+    for (let y = 0; y < this.state.puzzleImg.height; y += dy) {
+      for (let x = 0; x < this.state.puzzleImg.width; x += dx) {
         let tile = (
           <Tile
             dx={dx}
