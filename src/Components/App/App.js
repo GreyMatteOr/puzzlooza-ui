@@ -1,9 +1,10 @@
 import './App.css';
+import Puzzle from '../Puzzle/Puzzle.js'
 
 function App() {
   return (
     <div className="App">
-    Foobar!
+      <Puzzle />
     </div>
   );
 }
