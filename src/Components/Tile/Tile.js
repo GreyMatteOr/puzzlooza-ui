@@ -18,7 +18,11 @@ class Tile extends Component {
 
   componentDidMount() {
     this.drawTile(this.canvas.current)
-    dragmove(this.canvas.current, this.canvas.current)
+    dragmove(this.canvas.current, this.canvas.current, ()=>{}, ()=>this.checkLocation()) 
+  }
+
+  checkLocation(){
+    console.log('yeet')
   }
 
   render() {
