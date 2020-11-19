@@ -35,6 +35,7 @@ class Puzzle extends Component {
             dy={dy}
             image={this.state.puzzleImg}
             key={`${x},${y}`}
+            id={`${x},${y}`}
             x= { (x * dx) + xOffset }
             y= { (y * dy) + yOffset }
           />
