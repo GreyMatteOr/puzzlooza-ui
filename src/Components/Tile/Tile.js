@@ -18,10 +18,14 @@ class Tile extends Component {
 
   componentDidMount() {
     this.drawTile(this.canvas.current)
-    dragmove(this.canvas.current, this.canvas.current, ()=>{}, this.checkLocation)
+    dragmove(this.canvas.current, this.canvas.current, ()=>{this.canvas.current.style.zIndex= 1}, this.checkLocation)
   }
-  checkLocation(canvas, x, y){
-    console.log(canvas.id)
+  checkLocation = (canvas, x, y) => {
+    this.canvas.current.style.zIndex= 0
+    console.log(document.elementFromPoint(x - 1 , y))
+    document.elementFromPoint(x, y - 1)
+    document.elementFromPoint(x, y + canvas.height + 1)
+    document.elementFromPoint(x + canvas.width + 1 , y )
   }
 
   render() {
@@ -33,7 +37,8 @@ class Tile extends Component {
         height: "100px",
         borderColor: "black",
         borderStyle: "double",
-        position: "fixed"
+        position: "fixed",
+        zIndex: 0
       }}>
     </canvas>
   }
