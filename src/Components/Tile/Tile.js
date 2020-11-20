@@ -85,16 +85,16 @@ class Tile extends Component {
     height = +height.split("px")[0];
     width = +width.split("px")[0];
     let tL = document.elementFromPoint(x, y - 1);
+    this.checkMatch(tL, "Top")
     let tR = document.elementFromPoint(x + width, y - 1);
-    //this.checkMatch(tL, tR)
-    this.moveTile(tL, parseInt(tL.parentElement.style.x), y - height - 2,  "Top");
+    this.checkMatch(tR, "Top")
+    this.moveTile(tL, parseInt(tL.parentElement.style.x), y - height - 2);
     if (tL.id !== tR.id)
-      this.moveTile(tR, parseInt(tR.parentElement.style.left), y - height - 2, "Top");
+      this.moveTile(tR, parseInt(tR.parentElement.style.left), y - height - 2);
   };
 
   moveTile(tile, newX, newY, side) {
     if (tile.classList.contains("App")) return;
-    this.checkMatch(tile, side)
     tile.parentElement.style.top = newY + "px";
     tile.parentElement.style.left = newX + "px";
     window.setTimeout(
