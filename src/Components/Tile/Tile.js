@@ -67,11 +67,11 @@ class Tile extends Component {
     let bR = document.elementsFromPoint(x + width, y + height + 1);
     let bRCanvas = bR.find(element => element.className === "canvas-grouping" )
     this.checkMatch(bR[0], "Bottom")
-    console.log(bR, bRCanvas, bLCanvas)
-    if (bLCanvas || bRCanvas){
-    this.moveTile(bL, parseInt(bLCanvas.style.left), y + height + 2);
-    if (bL.id !== bR.id)
-      this.moveTile(bR, parseInt(bRCanvas.style.left), y + height + 2);
+    if(bLCanvas){
+    this.moveTile(bLCanvas, parseInt(bLCanvas.style.left), y + height + 2);
+    }
+    if (bL[0].id !== bR[0].id && bRCanvas){
+      this.moveTile(bRCanvas, parseInt(bRCanvas.style.left), y + height + 2);
     }
   };
 
@@ -125,10 +125,10 @@ class Tile extends Component {
   };
 
   moveTile(tile, newX, newY) {
-    tile.parentElement.style.top = newY + "px";
-    tile.parentElement.style.left = newX + "px";
+    tile.style.top = newY + "px";
+    tile.style.left = newX + "px";
     window.setTimeout(
-      () => this.checkOverlap(tile.parentElement, newX, newY),
+      () => this.checkOverlap(tile, newX, newY),
       0
     );
   }
