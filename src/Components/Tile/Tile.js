@@ -34,13 +34,21 @@ class Tile extends Component {
     this.checkTop( grouping.style, x, y );
     this.grouping.current.style.zIndex = 0;
   }
+  checkMatch = (s1, s2) =>{
+    const sides = [s1, s2]
+    sides.some(side => {
+    if (Object.values(side.dataset).length && Object.values(side.dataset).includes(this.canvas.current.id)){
+      console.log('Match')
+    }
+    })
+  }
 
   checkBottom = ( {height, width}, x, y ) => {
     height = parseInt(height);
     width = parseInt(width);
     let bL = document.elementFromPoint(x , y + height + 1);
     let bR = document.elementFromPoint(x + width , y + height + 1)
-    console.log(bL.dataset.top)
+    this.checkMatch(bL, bR)
     this.moveTile(bL, parseInt(bL.parentElement.style.left), y + height + 2);
     if (bL.id !== bR.id) this.moveTile(bR, parseInt(bR.parentElement.style.left), y + height + 2);
   }
