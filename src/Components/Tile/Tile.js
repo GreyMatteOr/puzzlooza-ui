@@ -50,6 +50,7 @@ class Tile extends Component {
     height = parseInt(height);
     width = parseInt(width);
     let bL = document.elementFromPoint(x, y + height + 1);
+    let bl2 = document.elementsFromPoint(x, y + height + 1)
     if(this.checkMatch(bL, "Bottom")) return;
     let bR = document.elementFromPoint(x + width, y + height + 1);
     if(this.checkMatch(bR, "Bottom")) return;
