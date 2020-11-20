@@ -29,12 +29,6 @@ class Puzzle extends Component {
           yOffset = y;
           yLeftover--;
         }
-        let matches={
-          t: `${x}, ${y - 1}`,
-          b: `${x}, ${y + 1}`,
-          l: `${x - 1}, ${y}`,
-          r: `${x + 1}, ${y}`
-        }
         let tile = (
           <Tile
             dx={dx}
@@ -42,9 +36,12 @@ class Puzzle extends Component {
             image={this.state.puzzleImg}
             key={`${x},${y}`}
             coordinates={`${x},${y}`}
+            t= {`${x},${y - 1}`}
+            b= {`${x},${y + 1}`}
+            l= {`${x - 1},${y}`}
+            r= {`${x + 1},${y}`}
             x= { (x * dx) + xOffset }
             y= { (y * dy) + yOffset }
-            matches= { matches }
           />
         )
 
