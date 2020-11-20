@@ -42,9 +42,10 @@ class Tile extends Component {
     return true
   }
   checkMatch = (tile, side) => {
-    if(!tile.dataset){
+    if(!tile){
       return
     }
+    console.log(tile.firstChild)
     const sideToCheck = {
       Bottom: "top",
       Left: "right",
@@ -63,7 +64,7 @@ class Tile extends Component {
     width = parseInt(width);
     let bL = document.elementsFromPoint(x, y + height + 1);
     let bLCanvas = bL.find(element => element.className === "canvas-grouping")
-    this.checkMatch(bL[0], "Bottom")
+    this.checkMatch(bLCanvas, "Bottom")
     let bR = document.elementsFromPoint(x + width, y + height + 1);
     let bRCanvas = bR.find(element => element.className === "canvas-grouping" )
     this.checkMatch(bR[0], "Bottom")
@@ -80,14 +81,14 @@ class Tile extends Component {
     width = +width.split("px")[0];
     let bL = document.elementsFromPoint(x - 1, y + height);
     let bLCanvas = bL.find(element => element === "canvas")
-    this.checkMatch(bL, "Left")
+    this.checkMatch(bLCanvas, "Left")
     let tL = document.elementsFromPoint(x - 1, y);
     let tLCanvas = tL.find(element => element === "canvas")
-    this.checkMatch(tL, "Left")
+    this.checkMatch(tLCanvas, "Left")
     if(tLCanvas){
-    this.moveTile(bL, x - width - 2, parseInt(bL.parentElement.style.top));
+    this.moveTile(bLCanvas, x - width - 2, parseInt(bLCanvas.parentElement.style.top));
     if (bL.id !== tL.id)
-      this.moveTile(tL, x - width - 2, parseInt(tL.parentElement.style.top));
+      this.moveTile(tLCanvas, x - width - 2, parseInt(tLCanvas.parentElement.style.top));
     }
   };
 
@@ -96,14 +97,14 @@ class Tile extends Component {
     width = +width.split("px")[0];
     let bR = document.elementsFromPoint(x + width + 1, y + height);
     let bRCanvas = bR.find(element => element === "canvas")
-    this.checkMatch(bR, "Right")
+    this.checkMatch(bRCanvas, "Right")
     let tR = document.elementsFromPoint(x + width + 1, y);
     let tRCanvas = tR.find(element => element === "canvas")
-    this.checkMatch(tR, "Right")
+    this.checkMatch(tRCanvas, "Right")
     if(bRCanvas){
-    this.moveTile(bR, x + width + 2, parseInt(bR.parentElement.style.top));
+    this.moveTile(bRCanvas, x + width + 2, parseInt(bRCanvas.parentElement.style.top));
     if (bR.id !== tR.id)
-      this.moveTile(tR, x + width + 2, parseInt(tR.parentElement.style.top));
+      this.moveTile(tRCanvas, x + width + 2, parseInt(tRCanvas.parentElement.style.top));
     }
   };
 
@@ -112,14 +113,14 @@ class Tile extends Component {
     width = +width.split("px")[0];
     let tL = document.elementsFromPoint(x, y - 1);
     let tLCanvas = tL.find(element => element === "canvas")
-    this.checkMatch(tL, "Top")
+    this.checkMatch(tLCanvas, "Top")
     let tR = document.elementsFromPoint(x + width, y - 1);
     let tRCanvas = tR.find(element => element === "canvas")
-    this.checkMatch(tR, "Top")
+    this.checkMatch(tRCanvas, "Top")
     if (tRCanvas){
-    this.moveTile(tL, parseInt(tL.parentElement.style.x), y - height - 2);
+    this.moveTile(tLCanvas, parseInt(tLCanvas.parentElement.style.x), y - height - 2);
     if (tL.id !== tR.id)
-      this.moveTile(tR, parseInt(tR.parentElement.style.left), y - height - 2);
+      this.moveTile(tRCanvas, parseInt(tRCanvas.parentElement.style.left), y - height - 2);
     }
     
   };
