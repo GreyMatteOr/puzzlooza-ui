@@ -28,7 +28,6 @@ class Tile extends Component {
   }
 
   checkOverlap = ( grouping, x, y ) => {
-    console.log(grouping)
     this.checkBottom( grouping.style, x, y );
     this.checkLeft( grouping.style, x, y );
     this.checkRight( grouping.style, x, y );
@@ -37,12 +36,11 @@ class Tile extends Component {
   }
 
   checkBottom = ( {height, width}, x, y ) => {
-    console.log(x, y)
     height = parseInt(height);
     width = parseInt(width);
-    console.log(height, width, x, y)
     let bL = document.elementFromPoint(x , y + height + 1);
     let bR = document.elementFromPoint(x + width , y + height + 1)
+    console.log(bL,bR)
     this.moveTile(bL, parseInt(bL.parentElement.style.left), y + height + 2);
     if (bL.id !== bR.id) this.moveTile(bR, parseInt(bR.parentElement.style.left), y + height + 2);
   }
@@ -93,14 +91,18 @@ class Tile extends Component {
           height: "100px",
           width: "100px",
           position: "fixed",
-          zIndex: 0
+          zIndex: 0,
         }}>
         <canvas
           ref={this.canvas}
           id={this.props.coordinates}
+          b={this.props.matches.b}
+          l={this.props.matches.l}
+          r={this.props.matches.r}
+          t={this.props.matches.t}
           style={{
             height: "100%",
-            width: "100%"
+            width: "100%",
           }}>
         </canvas>
       </div>
