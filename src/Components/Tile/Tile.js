@@ -40,7 +40,7 @@ class Tile extends Component {
     width = parseInt(width);
     let bL = document.elementFromPoint(x , y + height + 1);
     let bR = document.elementFromPoint(x + width , y + height + 1)
-    console.log(bL,bR)
+    console.log(bL.dataset.top)
     this.moveTile(bL, parseInt(bL.parentElement.style.left), y + height + 2);
     if (bL.id !== bR.id) this.moveTile(bR, parseInt(bR.parentElement.style.left), y + height + 2);
   }
@@ -82,6 +82,7 @@ class Tile extends Component {
 
 
   render() {
+    const [ x, y ] = this.props.coordinates.split(',').map(x => parseInt(x))
     return (
       <div
         className='canvas-grouping'
@@ -96,10 +97,10 @@ class Tile extends Component {
         <canvas
           ref={this.canvas}
           id={this.props.coordinates}
-          b={this.props.matches.b}
-          l={this.props.matches.l}
-          r={this.props.matches.r}
-          t={this.props.matches.t}
+          data-Bottom= {`${x},${y + 1}`}
+          data-Left= {`${x - 1},${y}`}
+          data-Right= {`${x + 1},${y}`}
+          data-Top= {`${x},${y - 1}`}
           style={{
             height: "100%",
             width: "100%",
