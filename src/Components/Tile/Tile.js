@@ -42,6 +42,7 @@ class Tile extends Component {
     }
     if (tile.dataset[sideToCheck[side]] === this.canvas.current.id){
       console.log(`${side} match`)
+      return true
     }
   };
 
@@ -49,9 +50,9 @@ class Tile extends Component {
     height = parseInt(height);
     width = parseInt(width);
     let bL = document.elementFromPoint(x, y + height + 1);
-    this.checkMatch(bL, "Bottom")
+    if(this.checkMatch(bL, "Bottom")) return;
     let bR = document.elementFromPoint(x + width, y + height + 1);
-    this.checkMatch(bR, "Bottom")
+    if(this.checkMatch(bR, "Bottom")) return;
     this.moveTile(bL, parseInt(bL.parentElement.style.left), y + height + 2);
     if (bL.id !== bR.id)
       this.moveTile(bR, parseInt(bR.parentElement.style.left), y + height + 2);
@@ -61,9 +62,9 @@ class Tile extends Component {
     height = +height.split("px")[0];
     width = +width.split("px")[0];
     let bL = document.elementFromPoint(x - 1, y + height);
-    this.checkMatch(bL, "Left")
+    if(this.checkMatch(bL, "Left")) return;
     let tL = document.elementFromPoint(x - 1, y);
-    this.checkMatch(tL, "Left")
+    if(this.checkMatch(tL, "Left")) return;
     this.moveTile(bL, x - width - 2, parseInt(bL.parentElement.style.top));
     if (bL.id !== tL.id)
       this.moveTile(tL, x - width - 2, parseInt(tL.parentElement.style.top));
@@ -73,9 +74,9 @@ class Tile extends Component {
     height = +height.split("px")[0];
     width = +width.split("px")[0];
     let bR = document.elementFromPoint(x + width + 1, y + height);
-    this.checkMatch(bR, "Right")
+    if(this.checkMatch(bR, "Right")) return;
     let tR = document.elementFromPoint(x + width + 1, y);
-    this.checkMatch(tR, "Right")
+    if(this.checkMatch(tR, "Right")) return;
     this.moveTile(bR, x + width + 2, parseInt(bR.parentElement.style.top));
     if (bR.id !== tR.id)
       this.moveTile(tR, x + width + 2, parseInt(tR.parentElement.style.top));
@@ -85,15 +86,15 @@ class Tile extends Component {
     height = +height.split("px")[0];
     width = +width.split("px")[0];
     let tL = document.elementFromPoint(x, y - 1);
-    this.checkMatch(tL, "Top")
+    if(this.checkMatch(tL, "Top")) return;
     let tR = document.elementFromPoint(x + width, y - 1);
-    this.checkMatch(tR, "Top")
+    if(this.checkMatch(tR, "Top")) return;
     this.moveTile(tL, parseInt(tL.parentElement.style.x), y - height - 2);
     if (tL.id !== tR.id)
       this.moveTile(tR, parseInt(tR.parentElement.style.left), y - height - 2);
   };
 
-  moveTile(tile, newX, newY, side) {
+  moveTile(tile, newX, newY) {
     if (tile.classList.contains("App")) return;
     tile.parentElement.style.top = newY + "px";
     tile.parentElement.style.left = newX + "px";
