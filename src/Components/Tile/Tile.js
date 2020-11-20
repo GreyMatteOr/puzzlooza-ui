@@ -18,25 +18,69 @@ class Tile extends Component {
 
   componentDidMount() {
     this.drawTile(this.canvas.current)
-    dragmove(this.canvas.current, this.canvas.current, ()=>{this.canvas.current.style.zIndex= 1}, this.checkLocation)
+    dragmove(
+      this.canvas.current,
+      this.canvas.current,
+      () => this.canvas.current.style.zIndex = 1,
+      this.checkOverlap
+    )
   }
-  checkLocation = (canvas, x, y) => {
-    this.canvas.current.style.zIndex= 0
-    console.log(document.elementFromPoint(x - 1 , y))
-    document.elementFromPoint(x, y - 1)
-    document.elementFromPoint(x, y + canvas.height + 1)
-    document.elementFromPoint(x + canvas.width + 1 , y )
+
+  checkOverlap( canvas, x, y ) {
+    this.checkBottom( canvas, x, y );
+    this.checkLeft( canvas, x, y );
+    this.checkRight( canvas, x, y );
+    this.checkTop( canvas, x, y );
   }
+
+
+  checkBottom( {height, width}, x, y ) {
+    let bL = document.elementFromPoint(x , y + height + 1);
+    let bR = document.elementFromPoint(x + width , y + height + 1)
+    this.moveTile(bL);
+    if (bL.id !== bR.id) this.moveTile(bR);
+  }
+
+  checkLeft( {height, width}, x, y ) {
+    let bL = document.elementFromPoint(x - 1, y + height);
+    let tL = document.elementFromPoint(x - 1 , y);
+    this.moveTile(bL);
+    this.moveTile(tL);
+  }
+
+  checkRight( {height, width}, x, y ) {
+    let bR = document.elementFromPoint(x + width + 1 , y + height)
+    let tR = document.elementFromPoint(x + width + 1 , y)
+    this.moveTile(bL);
+    this.moveTile(tR);
+  }
+
+  checkTop( {height, width}, x, y ) {
+    let tL = document.elementFromPoint(x, y - 1);
+    let tR = document.elementFromPoint(x + width , y - 1)
+    this.moveTile(tL);
+    this.moveTile(tR);
+  }
+
+  moveTile( tile, newX, newY ) {
+    if (!tile.classList.contains('App')) {
+      tile.style.top = newY;
+      tile.style.left = newX;
+      window.setTimeout( () => this.checkOverlap(tile), newX, newY, 0);
+    }
+  }
+
 
   render() {
     return <canvas
       ref={this.canvas}
       id={this.props.id}
       style={{
-        width: "100px",
-        height: "100px",
         borderColor: "black",
         borderStyle: "double",
+        height: "100px",
+        id: this.props.id,
+        width: "100px",
         position: "fixed",
         zIndex: 0
       }}>
