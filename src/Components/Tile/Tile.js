@@ -31,8 +31,6 @@ class Tile extends Component {
 
   checkMatch = ( height, width, x, y ) => {
     console.log( height, width, x, y)
-    height = parseInt(height);
-    width = parseInt(width);
     const sides = ['bottom', 'left', 'right', 'top'];
     const refPoints = {
       'bBL':  [ (x + (0.2 * width)), (y + (height + 1)) ],
@@ -79,36 +77,21 @@ class Tile extends Component {
     });
   }
 
-  checkOverlap = ( height, width, x, y) => {
-    console.log(x,y)
-    height = parseInt(height);
-    width = parseInt(width);
-    const sides = ['bottom', 'left', 'right', 'top'];
-    const refPoints = {
-      'bBL':  [ (x * (0.2 * width)), (y + (height + 1)) ],
-      'bBR':  [ (x * (0.8 * width)), (y + (height + 1)) ],
-      'lBL':  [ (x - 1), (y + (0.8 * height)) ],
-      'lTL':  [ (x - 1), (y + (0.2 * height)) ],
-      'rBR':  [ (x + width + 1), (y + (0.8 * height)) ],
-      'rTR':  [ (x + width + 1), (y + (0.2 * height)) ],
-      'tTL':  [ (x * (0.2 * width)), (y - 1) ],
-      'tTR':  [ (x * (0.8 * width)), (y - 1) ],
-    };
-    const sideCheckData = {
-      bottom: { match: "top", newXY: [ x, (y+height+3) ], refNames: ['bBL', 'bBR'] },
-      left: { match: "right", newXY: [ (x-width-3), y ], refNames: ['lBL', 'lTL'] },
-      right: { match: "left", newXY: [ (x+width+3), y ], refNames: ['rBR', 'rTR'] },
-      top: { match: "bottom", newXY: [ x, (y-height-3) ], refNames: ['tTL', 'tTR'] }
-    };
-
-    sides.forEach( side => {
-      let { refNames } = sideCheckData[side];
-      let { newXY } =  sideCheckData[side];
-      let ref1 = refPoints[ refNames[0] ];
-      let ref2 = refPoints[ refNames[1] ];
-      let tilesOnRef1 = document.elementsFromPoint( ...ref1 );
-      let tilesOnRef2 = document.elementsFromPoint( ...ref2 );
-      tilesOnRef1.concat( tilesOnRef2 ).forEach( tile => this.shove(tile, ...newXY) );
+  checkOverlap = ( height, width, x, y, noMove) => {
+    const center =   [ (x + ((1/2) * width)), (y + ((1/2) * height)) ];
+    const shoveSpots = [
+      [ x, (y+height+3) ],
+      [ (x-width-3), y ],
+      [ (x+width+3), y ],
+      [ x, (y-height-3) ]
+    ];
+    const tilesOnCenter = document.elementsFromPoint( ...center )
+    tilesOnCenter.forEach( tile => {
+      if ( tile.id !== noMove ) {
+        let random = Math.floor( Math.random() * shoveSpots.length )
+        let newXY = shoveSpots[ random ]
+        this.shove( tile, ...newXY );
+      }
     });
   }
 
@@ -117,18 +100,19 @@ class Tile extends Component {
   }
 
   shove(tile, newX, newY) {
-    if ( tile.classList.contains('tile')) {
+    if ( tile.classList.contains('tile') ) {
       let grouping = tile.parentNode
       let maxX = window.innerWidth - tile.offsetWidth;
       let maxY = window.innerHeight - tile.offsetHeight;
-      let oldX = parseInt(grouping.style.left)
-      let oldY = parseInt(grouping.style.top)
+      let oldX = parseInt(grouping.style.left) || 1;
+      let oldY = parseInt(grouping.style.top) || 1;
       newX = ( newX === null ? oldX : Math.min( Math.max(newX, 1), maxX) );
       newY = ( newY === null ? oldY : Math.min( Math.max(newY, 1), maxY) );
       grouping.style.top = newY + "px";
       grouping.style.left = newX + "px";
+      // grouping.dataset.willMove = 'true';
       window.setTimeout(
-        () => this.checkOverlap(grouping.offsetHeight, grouping.offsetWidth, newX, newY),
+        () => this.checkOverlap(grouping.offsetHeight, grouping.offsetWidth, newX, newY, tile.id),
         0
       );
     }
@@ -140,6 +124,7 @@ class Tile extends Component {
       <div
         className="canvas-grouping"
         data-drag-boundary='true'
+        data-will-move='false'
         data-grouped={false}
         id={this.props.coordinates.split(",").join("-")}
         ref={this.grouping}
