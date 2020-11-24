@@ -21,146 +21,138 @@ class Tile extends Component {
     dragmove(
       this.grouping.current,
       this.canvas.current,
-      () => (this.grouping.current.style.zIndex = 1),
-      this.checkOverlap
+      () => this.grouping.current.style.zIndex = 1,
+      (tile, x, y) => {
+        this.checkMatch(tile.offsetHeight, tile.offsetWidth, x, y);
+        this.grouping.current.style.zIndex = 0;
+      }
     );
   }
 
-  checkOverlap = (grouping, x, y) => {
-    this.checkBottom(grouping.style, x, y);
-    this.checkLeft(grouping.style, x, y);
-    this.checkRight(grouping.style, x, y);
-    this.checkTop(grouping.style, x, y);
-    this.grouping.current.style.zIndex = 0;
-  };
-  joinX(tile) {
-    tile.appendChild(this.canvas.current)
-    return true
-  }
-  joinY(tile) {
-    tile.appendChild(this.canvas.current)
-    return true
-  }
-  checkMatch = (tile, side) => {
-    if(!tile){
-      return
-    }
-    const sideToCheck = {
-      Bottom: "top",
-      Left: "right",
-      Right: "left",
-      Top: "bottom",
-    };
-    console.log(tile.firstChild.dataset[sideToCheck[side]], this.canvas.current.id)
-    if (tile.firstChild.dataset[sideToCheck[side]] === this.canvas.current.id) {
-      console.log(`${side} match`);
-      if (side === "bottom" || side === "top") return this.joinX(tile);
-      return this.joinY(tile);
-    }
-  };
-
-  checkBottom = ({ height, width }, x, y) => {
+  checkMatch = ( height, width, x, y ) => {
+    console.log( height, width, x, y)
     height = parseInt(height);
     width = parseInt(width);
-    let bL = document.elementsFromPoint(x, y + height + 1);
-    let bLCanvas = bL.find(element => element.className === "canvas-grouping")
-    this.checkMatch(bLCanvas, "Bottom")
-    let bR = document.elementsFromPoint(x + width, y + height + 1);
-    let bRCanvas = bR.find(element => element.className === "canvas-grouping" )
-    this.checkMatch(bRCanvas, "Bottom")
-    if(bLCanvas){
-    this.moveTile(bLCanvas, parseInt(bLCanvas.style.left), y + height + 2);
-    }
-    if (bL[0].id !== bR[0].id && bRCanvas){
-      this.moveTile(bRCanvas, parseInt(bRCanvas.style.left), y + height + 2);
-    }
-  };
+    const sides = ['bottom', 'left', 'right', 'top'];
+    const refPoints = {
+      'bBL':  [ (x + (0.2 * width)), (y + (height + 1)) ],
+      'bBR':  [ (x + (0.8 * width)), (y + (height + 1)) ],
+      'center': [ (x + ((1/2) * width)), (y + ((1/2) * height)) ],
+      'lBL':  [ (x - 1), (y + (0.8 * height)) ],
+      'lTL':  [ (x - 1), (y + (0.2 * height)) ],
+      'rBR':  [ (x + width + 1), (y + (0.8 * height)) ],
+      'rTR':  [ (x + width + 1), (y + (0.2 * height)) ],
+      'tTL':  [ (x + (0.2 * width)), (y - 1) ],
+      'tTR':  [ (x + (0.8 * width)), (y - 1) ],
+    };
+    const sideCheckData = {
+      bottom: { match: "top", newXY: [ null,(y+height+3) ], refNames: ['bBL', 'bBR'] },
+      left: { match: "right", newXY: [ (x-width-3), null ], refNames: ['lBL', 'lTL'] },
+      right: { match: "left", newXY: [ (x+width+3), null ], refNames: ['rBR', 'rTR'] },
+      top: { match: "bottom", newXY: [ null,(y-height-3) ], refNames: ['tTL', 'tTR'] }
+    };
+    const tilesOnCenter = document.elementsFromPoint( ...refPoints['center'] );
 
-  checkLeft = ({ height, width }, x, y) => {
-    height = +height.split("px")[0];
-    width = +width.split("px")[0];
-    let bL = document.elementsFromPoint(x - 1, y + height);
-    let bLCanvas = bL.find(element => element.className === "canvas-grouping")
-    this.checkMatch(bLCanvas, "Left")
-    let tL = document.elementsFromPoint(x - 1, y);
-    let tLCanvas = tL.find(element => element.className === "canvas-grouping")
-    this.checkMatch(tLCanvas, "Left")
-    if(bLCanvas){
-    this.moveTile(bLCanvas, x - width - 2, parseInt(bLCanvas.style.top));
-    if (bL[0].id !== tL[0].id && tLCanvas)
-      this.moveTile(tLCanvas, x - width - 2, parseInt(tLCanvas.style.top));
-    }
-  };
+    sides.forEach( side => {
+      let { refNames } = sideCheckData[side];
+      let { newXY } =  sideCheckData[side];
+      let ref1 = refPoints[ refNames[0] ];
+      let ref2 = refPoints[ refNames[1] ];
+      let tilesOnRef1 = document.elementsFromPoint( ...ref1 );
+      let tilesOnRef2 = document.elementsFromPoint( ...ref2 );
 
-  checkRight = ({ height, width }, x, y) => {
-    height = +height.split("px")[0];
-    width = +width.split("px")[0];
-    let bR = document.elementsFromPoint(x + width + 1, y + height);
-    let bRCanvas = bR.find(element => element.className === "canvas-grouping")
-    this.checkMatch(bRCanvas, "Right")
-    let tR = document.elementsFromPoint(x + width + 1, y);
-    let tRCanvas = tR.find(element => element.className === "canvas-grouping")
-    this.checkMatch(tRCanvas, "Right")
-    if(bRCanvas){
-    this.moveTile(bRCanvas, x + width + 2, parseInt(bRCanvas.style.top));
-    if (bR[0].id !== tR[0].id && tRCanvas)
-      this.moveTile(tRCanvas, x + width + 2, parseInt(tRCanvas.style.top));
-    }
-  };
+      tilesOnRef1 = tilesOnRef1.filter( (tile1, i1) => {
+        let i2 = tilesOnRef2.indexOf( tile1 );
+        if ( i2 >= 0 ) {
+          if (tilesOnCenter.includes( tile1 )) { this.shove(tile1, ...newXY) }
+          else { this.join(this.canvas.current, tile1, sideCheckData[side].match) }
 
-  checkTop = ({ height, width }, x, y) => {
-    height = +height.split("px")[0];
-    width = +width.split("px")[0];
-    let tL = document.elementsFromPoint(x, y - 1);
-    let tLCanvas = tL.find(element => element.className === "canvas-grouping")
-    this.checkMatch(tLCanvas, "Top")
-    let tR = document.elementsFromPoint(x + width, y - 1);
-    let tRCanvas = tR.find(element => element.className === "canvas-grouping")
-    this.checkMatch(tRCanvas, "Top")
-    if (tLCanvas){
-    this.moveTile(tLCanvas, parseInt(tLCanvas.style.x), y - height - 2);
-    if (tL[0].id !== tR[0].id && tRCanvas)
-      this.moveTile(tRCanvas, parseInt(tRCanvas.style.left), y - height - 2);
-    }
-    
-  };
+          tilesOnRef2.splice(i2, 1);
+          return false;
+        }
 
-  moveTile(tile, newX, newY) {
-    tile.style.top = newY + "px";
-    tile.style.left = newX + "px";
-    window.setTimeout(
-      () => this.checkOverlap(tile, newX, newY),
-      0
-    );
+        return true;
+      });
+
+      let leftOvers = tilesOnRef1.concat( tilesOnRef2 );
+      leftOvers.forEach( tile => this.shove(tile, ...newXY) );
+    });
+  }
+
+  checkOverlap = ( height, width, x, y) => {
+    console.log(x,y)
+    height = parseInt(height);
+    width = parseInt(width);
+    const sides = ['bottom', 'left', 'right', 'top'];
+    const refPoints = {
+      'bBL':  [ (x * (0.2 * width)), (y + (height + 1)) ],
+      'bBR':  [ (x * (0.8 * width)), (y + (height + 1)) ],
+      'lBL':  [ (x - 1), (y + (0.8 * height)) ],
+      'lTL':  [ (x - 1), (y + (0.2 * height)) ],
+      'rBR':  [ (x + width + 1), (y + (0.8 * height)) ],
+      'rTR':  [ (x + width + 1), (y + (0.2 * height)) ],
+      'tTL':  [ (x * (0.2 * width)), (y - 1) ],
+      'tTR':  [ (x * (0.8 * width)), (y - 1) ],
+    };
+    const sideCheckData = {
+      bottom: { match: "top", newXY: [ x, (y+height+3) ], refNames: ['bBL', 'bBR'] },
+      left: { match: "right", newXY: [ (x-width-3), y ], refNames: ['lBL', 'lTL'] },
+      right: { match: "left", newXY: [ (x+width+3), y ], refNames: ['rBR', 'rTR'] },
+      top: { match: "bottom", newXY: [ x, (y-height-3) ], refNames: ['tTL', 'tTR'] }
+    };
+
+    sides.forEach( side => {
+      let { refNames } = sideCheckData[side];
+      let { newXY } =  sideCheckData[side];
+      let ref1 = refPoints[ refNames[0] ];
+      let ref2 = refPoints[ refNames[1] ];
+      let tilesOnRef1 = document.elementsFromPoint( ...ref1 );
+      let tilesOnRef2 = document.elementsFromPoint( ...ref2 );
+      tilesOnRef1.concat( tilesOnRef2 ).forEach( tile => this.shove(tile, ...newXY) );
+    });
+  }
+
+  join( tile1, tile2, direction) {
+    console.log(direction)
+  }
+
+  shove(tile, newX, newY) {
+    if ( tile.classList.contains('tile')) {
+      let grouping = tile.parentNode
+      let maxX = window.innerWidth - tile.offsetWidth;
+      let maxY = window.innerHeight - tile.offsetHeight;
+      let oldX = parseInt(grouping.style.left)
+      let oldY = parseInt(grouping.style.top)
+      newX = ( newX === null ? oldX : Math.min( Math.max(newX, 1), maxX) );
+      newY = ( newY === null ? oldY : Math.min( Math.max(newY, 1), maxY) );
+      grouping.style.top = newY + "px";
+      grouping.style.left = newX + "px";
+      window.setTimeout(
+        () => this.checkOverlap(grouping.offsetHeight, grouping.offsetWidth, newX, newY),
+        0
+      );
+    }
   }
 
   render() {
-    const [x, y] = this.props.coordinates.split(",").map((x) => parseInt(x));
+    const [x, y] = this.props.coordinates.split(",").map( (num) => parseInt(num) );
     return (
       <div
         className="canvas-grouping"
+        data-drag-boundary='true'
+        data-grouped={false}
         id={this.props.coordinates.split(",").join("-")}
         ref={this.grouping}
-        data-grouped={false}
-        style={{
-          height: "100px",
-          width: "100px",
-          position: "fixed",
-          zIndex: 0,
-        }}
       >
         <canvas
-          ref={this.canvas}
+          className="tile"
+          data-bottom={`${x},${y + 1}`}
+          data-left={`${x - 1},${y}`}
+          data-right={`${x + 1},${y}`}
+          data-top={`${x},${y - 1}`}
           id={this.props.coordinates}
-          data-Bottom={`${x},${y + 1}`}
-          data-Left={`${x - 1},${y}`}
-          data-Right={`${x + 1},${y}`}
-          data-Top={`${x},${y - 1}`}
-          style={{
-            height: "100%",
-            width: "100%",
-          }}
-        ></canvas>
+          ref={this.canvas}>
+        </canvas>
       </div>
     );
   }

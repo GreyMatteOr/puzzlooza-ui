@@ -1,0 +1,14 @@
+.canvas-grouping {
+  height: 100px;
+  width: 100px;
+  position: fixed;
+  z-index: 0;
+/* 
+  transition-property: all;
+  transition-duration: .6s; */
+}
+
+.tile {
+  height: 100%;
+  width: 100%;
+}
