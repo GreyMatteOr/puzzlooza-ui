@@ -5,15 +5,31 @@ import "./Tile.css";
 class Tile extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.coordinates = this.props.coordinates.split(",").map( (num) => parseInt(num) );
     this.canvas = React.createRef();
     this.grouping = React.createRef();
-  }
+    let [x, y] = this.coordinates;
 
-  drawTile(canvas) {
-    let ctx = canvas.getContext("2d");
-    let { dx, dy, image, x, y } = this.props;
-    ctx.drawImage(image, x, y, dx, dy, 0, 0, 300, 150);
+    let baseTile = (
+      <canvas
+        className="tile"
+        data-bottom={`${x},${y + 1}`}
+        data-left={`${x - 1},${y}`}
+        data-right={`${x + 1},${y}`}
+        data-top={`${x},${y - 1}`}
+        id={this.props.coordinates}
+        ref={this.canvas}
+        style={{
+          gridColumn: '1',
+          gridRow: '1'
+        }}>
+      </canvas>
+    )
+    this.state = {
+      dimensionX: 1,
+      dimensionY: 1,
+      tiles: [[baseTile]]
+    };
   }
 
   componentDidMount() {
@@ -30,7 +46,6 @@ class Tile extends Component {
   }
 
   checkMatch = ( height, width, x, y ) => {
-    console.log( height, width, x, y)
     const sides = ['bottom', 'left', 'right', 'top'];
     const refPoints = {
       'bBL':  [ (x + (0.2 * width)), (y + (height + 1)) ],
@@ -63,7 +78,7 @@ class Tile extends Component {
         let i2 = tilesOnRef2.indexOf( tile1 );
         if ( i2 >= 0 ) {
           if (tilesOnCenter.includes( tile1 )) { this.shove(tile1, ...newXY) }
-          else { this.join(this.canvas.current, tile1, sideCheckData[side].match) }
+          else { this.join(tile1, sideCheckData[side].match) }
 
           tilesOnRef2.splice(i2, 1);
           return false;
@@ -95,8 +110,15 @@ class Tile extends Component {
     });
   }
 
-  join( tile1, tile2, direction) {
-    console.log(direction)
+  drawTile(canvas) {
+    let ctx = canvas.getContext("2d");
+    let { dx, dy, image, x, y } = this.props;
+    ctx.drawImage(image, x, y, dx, dy, 0, 0, 300, 150);
+  }
+
+  join( tile, direction) {
+    console.log(tile)
+    this.props.delete(tile.id)
   }
 
   shove(tile, newX, newY) {
@@ -118,8 +140,16 @@ class Tile extends Component {
     }
   }
 
+  tileGrid( {tiles} ) {
+    for (let y = 0; y < tiles.length; y++) {
+      for (let x = 0; x < tiles[0].length; x++) {
+
+      }
+    }
+  }
+
   render() {
-    const [x, y] = this.props.coordinates.split(",").map( (num) => parseInt(num) );
+    let [x, y] = this.coordinates;
     return (
       <div
         className="canvas-grouping"
@@ -128,16 +158,13 @@ class Tile extends Component {
         data-grouped={false}
         id={this.props.coordinates.split(",").join("-")}
         ref={this.grouping}
+        style={{
+          display: "grid",
+          gridTemplateColumns: `${this.state.dimensionX}`,
+          gridTemplateRows: `${this.state.dimensionY}`
+        }}
       >
-        <canvas
-          className="tile"
-          data-bottom={`${x},${y + 1}`}
-          data-left={`${x - 1},${y}`}
-          data-right={`${x + 1},${y}`}
-          data-top={`${x},${y - 1}`}
-          id={this.props.coordinates}
-          ref={this.canvas}>
-        </canvas>
+        {this.state.tiles}
       </div>
     );
   }

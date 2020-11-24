@@ -8,17 +8,17 @@ class Puzzle extends Component {
     super(props);
     this.state = {
       loadingPicture: true,
-      puzzleImg: null
+      tiles: {}
     }
   }
 
-  createTiles(xSplits, ySplits) {
-    let {width, height} = this.state.puzzleImg;
+  createTiles(xSplits, ySplits, puzzleImg) {
+    let {width, height} = puzzleImg;
     let dx = Math.floor( width / xSplits );
     let dy = Math.floor( height / ySplits );
     let xLeftover = width % dx
     let yLeftover = height % dy
-    let xOffset, yOffset, tiles = [];
+    let xOffset, yOffset, tiles = {};
     for (let y = 0; y < ySplits; y++) {
       for (let x = 0; x < xSplits; x++) {
         if (xLeftover) {
@@ -29,29 +29,34 @@ class Puzzle extends Component {
           yOffset = y;
           yLeftover--;
         }
-        let tile = (
+        tiles[`${x}-${y}`] = (
           <Tile
+            delete={this.delete}
             dx={dx}
             dy={dy}
-            image={this.state.puzzleImg}
+            image={puzzleImg}
             key={`${x},${y}`}
             coordinates={`${x},${y}`}
             x= { (x * dx) + xOffset }
             y= { (y * dy) + yOffset }
           />
         )
-
-        tiles.push(tile);
       }
     }
-    return tiles;
+    this.setState( {tiles} );
+  }
+
+  delete = (tile) => {
+    let newTiles = { ...this.state.tiles}
+    delete newTiles[tile]
+    this.setState( {tiles: newTiles} )
   }
 
   doneLoadingPic = (e) => {
+    this.createTiles(9, 6, e.target);
     this.setState(
       {
         loadingPicture: false,
-        puzzleImg: e.target
       }
     )
   }
@@ -69,7 +74,7 @@ class Puzzle extends Component {
 
     return (
       <>
-        {this.createTiles(9, 6)}
+        {Object.values( this.state.tiles )}
       </>
     )
   }
