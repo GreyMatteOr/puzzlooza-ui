@@ -27,11 +27,16 @@ class Tile extends Component {
   }
 
   checkMatch = ( tile, groupX, groupY) => {
-    console.log(tile, tile.style)
     let height = tile.offsetHeight;
     let width = tile.offsetWidth;
     let x = groupX + ( (parseInt(tile.style.gridColumn) - 1) * width );
     let y = groupY + ( (parseInt(tile.style.gridRow) - 1) * height );
+    const sideCheckData = {
+      bottom: { shoveXY: [ null,(y+height+3) ], refNames: ['bBL', 'bBR'] },
+      left: { shoveXY: [ (x-width-3), null ], refNames: ['lBL', 'lTL'] },
+      right: { shoveXY: [ (x+width+3), null ], refNames: ['rBR', 'rTR'] },
+      top: { shoveXY: [ null,(y-height-3) ], refNames: ['tTL', 'tTR'] }
+    };
     const sides = ['bottom', 'left', 'right', 'top'];
     const refPoints = {
       'bBL':  [ (x + (0.2 * width)), (y + (height + 3)) ],
@@ -44,17 +49,10 @@ class Tile extends Component {
       'tTL':  [ (x + (0.2 * width)), (y - 1) ],
       'tTR':  [ (x + (0.8 * width)), (y - 1) ],
     };
-    const sideCheckData = {
-      bottom: { newXY: [ null,(y+height+3) ], refNames: ['bBL', 'bBR'] },
-      left: { newXY: [ (x-width-3), null ], refNames: ['lBL', 'lTL'] },
-      right: { newXY: [ (x+width+3), null ], refNames: ['rBR', 'rTR'] },
-      top: { newXY: [ null,(y-height-3) ], refNames: ['tTL', 'tTR'] }
-    };
     const tilesOnCenter = document.elementsFromPoint( ...refPoints['center'] );
 
     sides.forEach( side => {
-      let { refNames } = sideCheckData[side];
-      let { newXY } =  sideCheckData[side];
+      let { shoveXY, refNames } = sideCheckData[side];
       let ref1 = refPoints[ refNames[0] ];
       let ref2 = refPoints[ refNames[1] ];
       let tilesOnRef1 = document.elementsFromPoint( ...ref1 );
@@ -62,10 +60,10 @@ class Tile extends Component {
 
       tilesOnRef1 = tilesOnRef1.filter( (tile1, i1) => {
         let i2 = tilesOnRef2.indexOf( tile1 );
-        if ( i2 >= 0 ) {
 
+        if ( i2 >= 0 ) {
           if (tilesOnCenter.includes( tile1 )) {
-            this.shove(tile1, ...newXY)
+            this.shove(tile1, ...shoveXY)
           }
           else if (
             tile1.classList.contains('tile') &&
@@ -74,7 +72,6 @@ class Tile extends Component {
            ) {
             this.join(tile, tile1.parentNode)
           }
-
           tilesOnRef2.splice(i2, 1);
           return false;
         }
@@ -83,7 +80,7 @@ class Tile extends Component {
       });
 
       let leftOvers = tilesOnRef1.concat( tilesOnRef2 );
-      leftOvers.forEach( tile => this.shove(tile, ...newXY) );
+      leftOvers.forEach( tile => this.shove(tile, ...shoveXY) );
     });
   }
 
@@ -99,8 +96,8 @@ class Tile extends Component {
     tilesOnCenter.forEach( tile => {
       if ( tile.id !== noMove ) {
         let random = Math.floor( Math.random() * shoveSpots.length )
-        let newXY = shoveSpots[ random ]
-        this.shove( tile, ...newXY );
+        let shoveXY = shoveSpots[ random ]
+        this.shove( tile, ...shoveXY );
       }
     });
   }
@@ -117,6 +114,7 @@ class Tile extends Component {
     let startX = parseInt( moveTile.parentNode.style.left );
     let startY = parseInt( moveTile.parentNode.style.top );
     let [x, y] = moveTile.id.split(",").map( (num) => parseInt(num) );
+
     [...joinGroup.children].forEach( tile => {
       let [xPrime, yPrime] = tile.id.split(",").map( (num) => parseInt(num) );
       let [relativePosX, relativePosY] = [xPrime - x, yPrime - y];
@@ -128,18 +126,15 @@ class Tile extends Component {
         newCol++;
         referenceCol++;
       }
-
       while (newRow < 1) {
         let emptyRow = new Array(this.tiles[0].length).fill(null);
         this.tiles.unshift(emptyRow);
         newRow++;
         referenceRow++;
       }
-
       while (newCol > this.tiles[0].length) {
         this.tiles.forEach( row => row.push( null ) )
       }
-
       while (newRow > this.tiles.length) {
         let emptyRow = new Array(this.tiles[0].length).fill(null);
         this.tiles.push(emptyRow);
@@ -158,17 +153,14 @@ class Tile extends Component {
       )
     })
 
-
     this.canvas.current.style.gridColumn = referenceCol;
     this.canvas.current.style.gridRow = referenceRow;
-
     this.updateGrid( moveTile, this.tiles, startX, startY);
     this.props.delete(joinGroup.id)
   }
 
   shove(tile, newX, newY) {
     if ( tile.classList.contains('tile') && this.grouping.current.id !== tile.parentNode.id ) {
-      console.log('hi!')
       let grouping = tile.parentNode
       let maxX = window.innerWidth - grouping.offsetWidth;
       let maxY = window.innerHeight - grouping.offsetHeight;
@@ -210,8 +202,6 @@ class Tile extends Component {
       <div
         className="canvas-grouping"
         data-drag-boundary='true'
-        data-will-move='false'
-        data-grouped={false}
         id={`${x}-${y}`}
         ref={this.grouping}
         style={{
