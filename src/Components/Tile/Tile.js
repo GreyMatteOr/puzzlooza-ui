@@ -179,18 +179,26 @@ class Tile extends Component {
   }
 
   updateGrid( tiles ) {
+    let minX = window.innerWidth;
+    let minY = window.innerHeight;
     for (let row = 0; row < tiles.length; row++) {
       for (let col = 0; col < tiles[0].length; col++) {
-        if (tiles[row][col] !== null) {
-          tiles[row][col].style.gridColumn = col + 1;
-          tiles[row][col].style.gridRow = row + 1;
+        let tile = tiles[row][col];
+        if (tile !== null) {
+          tile.style.gridColumn = col + 1;
+          tile.style.gridRow = row + 1;
+          minX = Math.min(minX, tile.parentNode.style.left)
+          minY = Math.min(minY, tile.parentNode.style.top)
         }
       }
     }
-    this.grouping.current.style.gridTemplateColumns = tiles[0].length;
-    this.grouping.current.style.gridTemplateRows = tiles.length;
-    this.grouping.current.style.height = (tiles.length * 100) + "px";
-    this.grouping.current.style.width = (tiles[0].length * 100) + "px";
+    let { style } = this.grouping.current;
+    style.gridTemplateColumns = tiles[0].length;
+    style.gridTemplateRows = tiles.length;
+    style.height = (tiles.length * 100) + "px";
+    style.left = minX;
+    style.top = minY;
+    style.width = (tiles[0].length * 100) + "px";
   }
 
   render() {
