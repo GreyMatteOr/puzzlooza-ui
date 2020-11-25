@@ -47,6 +47,7 @@ class Puzzle extends Component {
   }
 
   delete = (tile) => {
+    console.log('DELETE')
     let newTiles = { ...this.state.tiles}
     delete newTiles[tile]
     this.setState( {tiles: newTiles} )

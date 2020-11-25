@@ -21,20 +21,19 @@ class Tile extends Component {
         if (isNaN(x)) x = 1;
         if (isNaN(y)) y = 1;
         this.grouping.current.style.zIndex = 0;
-        this.checkMatch(grouping.offsetHeight, grouping.offsetWidth, x, y, tile);
+        this.checkMatch(tile.offsetHeight, tile.offsetWidth, x, y, tile);
       }
     );
   }
 
   checkMatch = ( height, width, x, y, tile ) => {
-    console.log(height, width, x, y, tile)
     const sides = ['bottom', 'left', 'right', 'top'];
     const refPoints = {
-      'bBL':  [ (x + (0.2 * width)), (y + (height + 1)) ],
-      'bBR':  [ (x + (0.8 * width)), (y + (height + 1)) ],
+      'bBL':  [ (x + (0.2 * width)), (y + (height + 3)) ],
+      'bBR':  [ (x + (0.8 * width)), (y + (height + 3)) ],
       'center': [ (x + ((1/2) * width)), (y + ((1/2) * height)) ],
-      'lBL':  [ (x - 1), (y + (0.8 * height)) ],
-      'lTL':  [ (x - 1), (y + (0.2 * height)) ],
+      'lBL':  [ (x - 3), (y + (0.8 * height)) ],
+      'lTL':  [ (x - 3), (y + (0.2 * height)) ],
       'rBR':  [ (x + width + 1), (y + (0.8 * height)) ],
       'rTR':  [ (x + width + 1), (y + (0.2 * height)) ],
       'tTL':  [ (x + (0.2 * width)), (y - 1) ],
@@ -49,7 +48,6 @@ class Tile extends Component {
     const tilesOnCenter = document.elementsFromPoint( ...refPoints['center'] );
 
     sides.forEach( side => {
-      console.log(side)
       let { refNames } = sideCheckData[side];
       let { newXY } =  sideCheckData[side];
       let ref1 = refPoints[ refNames[0] ];
@@ -64,7 +62,11 @@ class Tile extends Component {
           if (tilesOnCenter.includes( tile1 )) {
             this.shove(tile1, ...newXY)
           }
-          else if ( tile1.classList.contains('tile') ) {
+          else if (
+            tile1.classList.contains('tile') &&
+            this.grouping.current.id !== tile1.parentNode.id &&
+            tile.dataset[side] === tile1.id
+           ) {
             this.join(tile, tile1.parentNode, side)
           }
 
@@ -105,28 +107,22 @@ class Tile extends Component {
   }
 
   join( moveTile, joinGroup, direction) {
-    console.log('join')
     let referenceCol = parseInt( moveTile.style.gridColumn );
     let referenceRow = parseInt( moveTile.style.gridRow );
     let [x, y] = moveTile.id.split(",").map( (num) => parseInt(num) );
-    // console.log(joinGroup.children)
     [...joinGroup.children].forEach( tile => {
-      console.log('joinGroup', joinGroup.children, this.grouping.current.children)
       let [xPrime, yPrime] = tile.id.split(",").map( (num) => parseInt(num) );
       let [relativePosX, relativePosY] = [xPrime - x, yPrime - y];
       let newCol = relativePosX + referenceCol;
       let newRow = relativePosY + referenceRow;
-      // console.log(xPrime, x, relativePosX, newCol)
 
       while (newCol < 1) {
-        console.log( 'add Early Column')
         this.tiles.forEach( row => row.unshift( null ) )
         newCol++;
         referenceCol++;
       }
 
       while (newRow < 1) {
-        console.log( 'add Early Row')
         let emptyRow = new Array(this.tiles[0].length).fill(null);
         this.tiles.unshift(emptyRow);
         newRow++;
@@ -134,12 +130,10 @@ class Tile extends Component {
       }
 
       while (newCol > this.tiles[0].length) {
-        console.log( 'add late Column')
         this.tiles.forEach( row => row.push( null ) )
       }
 
       while (newRow > this.tiles.length) {
-        console.log( 'add late row')
         let emptyRow = new Array(this.tiles[0].length).fill(null);
         this.tiles.push(emptyRow);
       }
@@ -156,7 +150,6 @@ class Tile extends Component {
         }
       )
     })
-    // console.log(this.tiles.concat())
 
 
     this.canvas.current.style.gridColumn = referenceCol;
@@ -189,7 +182,6 @@ class Tile extends Component {
     for (let row = 0; row < tiles.length; row++) {
       for (let col = 0; col < tiles[0].length; col++) {
         if (tiles[row][col] !== null) {
-          // console.log(row, col, tiles[row][col])
           tiles[row][col].style.gridColumn = col + 1;
           tiles[row][col].style.gridRow = row + 1;
         }
@@ -199,8 +191,6 @@ class Tile extends Component {
     this.grouping.current.style.gridTemplateRows = tiles.length;
     this.grouping.current.style.height = (tiles.length * 100) + "px";
     this.grouping.current.style.width = (tiles[0].length * 100) + "px";
-    // console.log(tiles)
-    // console.log(this.grouping)
   }
 
   render() {
