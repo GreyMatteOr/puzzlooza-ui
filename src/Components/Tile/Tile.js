@@ -18,11 +18,12 @@ class Tile extends Component {
       this.canvas.current,
       this.props.client,
       () => this.grouping.current.style.zIndex = 2,
-      (grouping, tile, x, y) => {
+      (grouping, handlerTile, x, y) => {
+        console.log(handlerTile)
         if (isNaN(x)) x = 1;
         if (isNaN(y)) y = 1;
         this.grouping.current.style.zIndex = 0;
-        this.checkMatch( tile, x, y );
+        this.checkMatch( handlerTile, x, y );
       }
     );
   }
@@ -146,9 +147,10 @@ class Tile extends Component {
       dragmove(
         this.grouping.current,
         tile,
+        this.props.client,
         () => this.grouping.current.style.zIndex = 1,
-        (grouping, htile, x, y) => {
-          this.checkMatch( htile, x, y );
+        (grouping, handlerTile, x, y) => {
+          this.checkMatch( handlerTile, x, y );
           this.grouping.current.style.zIndex = 0;
         }
       )
