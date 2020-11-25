@@ -1,0 +1,12 @@
+.canvas-grouping {
+  height: 100px;
+  width: 100px;
+  position: fixed;
+  z-index: 0;
+}
+
+.tile {
+  height: 100px;
+  width: 100px;
+  z-index: 1;
+}
