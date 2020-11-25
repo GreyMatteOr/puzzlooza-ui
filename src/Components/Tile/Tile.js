@@ -114,6 +114,8 @@ class Tile extends Component {
   join( moveTile, joinGroup) {
     let referenceCol = parseInt( moveTile.style.gridColumn );
     let referenceRow = parseInt( moveTile.style.gridRow );
+    let startX = parseInt( moveTile.parentNode.style.left );
+    let startY = parseInt( moveTile.parentNode.style.top );
     let [x, y] = moveTile.id.split(",").map( (num) => parseInt(num) );
     [...joinGroup.children].forEach( tile => {
       let [xPrime, yPrime] = tile.id.split(",").map( (num) => parseInt(num) );
@@ -160,22 +162,22 @@ class Tile extends Component {
     this.canvas.current.style.gridColumn = referenceCol;
     this.canvas.current.style.gridRow = referenceRow;
 
-    this.updateGrid( this.tiles );
+    this.updateGrid( moveTile, this.tiles, startX, startY);
     this.props.delete(joinGroup.id)
   }
 
   shove(tile, newX, newY) {
-    if ( tile.classList.contains('tile') ) {
+    if ( tile.classList.contains('tile') && this.grouping.current.id !== tile.parentNode.id ) {
+      console.log('hi!')
       let grouping = tile.parentNode
-      let maxX = window.innerWidth - tile.offsetWidth;
-      let maxY = window.innerHeight - tile.offsetHeight;
+      let maxX = window.innerWidth - grouping.offsetWidth;
+      let maxY = window.innerHeight - grouping.offsetHeight;
       let oldX = parseInt(grouping.style.left) || 1;
       let oldY = parseInt(grouping.style.top) || 1;
       newX = ( newX === null ? oldX : Math.min( Math.max(newX, 1), maxX) );
       newY = ( newY === null ? oldY : Math.min( Math.max(newY, 1), maxY) );
       grouping.style.top = newY + "px";
       grouping.style.left = newX + "px";
-      // grouping.dataset.willMove = 'true';
       window.setTimeout(
         () => this.checkOverlap(grouping.offsetHeight, grouping.offsetWidth, newX, newY, tile.id),
         0
@@ -183,17 +185,13 @@ class Tile extends Component {
     }
   }
 
-  updateGrid( tiles ) {
-    let minX = window.innerWidth;
-    let minY = window.innerHeight;
+  updateGrid( baseTile, tiles, startX, startY ) {
     for (let row = 0; row < tiles.length; row++) {
       for (let col = 0; col < tiles[0].length; col++) {
         let tile = tiles[row][col];
         if (tile !== null) {
           tile.style.gridColumn = col + 1;
           tile.style.gridRow = row + 1;
-          minX = Math.min(minX, tile.parentNode.style.left)
-          minY = Math.min(minY, tile.parentNode.style.top)
         }
       }
     }
@@ -201,8 +199,8 @@ class Tile extends Component {
     style.gridTemplateColumns = tiles[0].length;
     style.gridTemplateRows = tiles.length;
     style.height = (tiles.length * 100) + "px";
-    style.left = minX;
-    style.top = minY;
+    style.left = startX - ( (parseInt(baseTile.style.gridColumn) - 1) * 100 ) + 'px';
+    style.top = startY - ( (parseInt(baseTile.style.gridRow) - 1) * 100 ) + 'px';
     style.width = (tiles[0].length * 100) + "px";
   }
 
