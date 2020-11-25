@@ -1,51 +1,30 @@
-import { dragmove } from "@knadh/dragmove";
+import { dragmove, handleMouseUp, handleMouseDown } from "../../dragmove";
 import React, { Component } from "react";
 import "./Tile.css";
 
 class Tile extends Component {
   constructor(props) {
     super(props);
-    this.coordinates = this.props.coordinates.split(",").map( (num) => parseInt(num) );
     this.canvas = React.createRef();
     this.grouping = React.createRef();
-    let [x, y] = this.coordinates;
-
-    let baseTile = (
-      <canvas
-        className="tile"
-        data-bottom={`${x},${y + 1}`}
-        data-left={`${x - 1},${y}`}
-        data-right={`${x + 1},${y}`}
-        data-top={`${x},${y - 1}`}
-        id={this.props.coordinates}
-        ref={this.canvas}
-        style={{
-          gridColumn: '1',
-          gridRow: '1'
-        }}>
-      </canvas>
-    )
-    this.state = {
-      dimensionX: 1,
-      dimensionY: 1,
-      tiles: [[baseTile]]
-    };
+    this.tiles = [];
   }
 
   componentDidMount() {
+    this.tiles.push([this.canvas.current]);
     this.drawTile(this.canvas.current);
-    dragmove(
+    this.unregister = dragmove(
       this.grouping.current,
       this.canvas.current,
       () => this.grouping.current.style.zIndex = 1,
-      (tile, x, y) => {
-        this.checkMatch(tile.offsetHeight, tile.offsetWidth, x, y);
+      (grouping, tile, x, y) => {
+        this.checkMatch(grouping.offsetHeight, grouping.offsetWidth, x, y, tile);
         this.grouping.current.style.zIndex = 0;
       }
     );
   }
 
-  checkMatch = ( height, width, x, y ) => {
+  checkMatch = ( height, width, x, y, tile ) => {
     const sides = ['bottom', 'left', 'right', 'top'];
     const refPoints = {
       'bBL':  [ (x + (0.2 * width)), (y + (height + 1)) ],
@@ -59,10 +38,10 @@ class Tile extends Component {
       'tTR':  [ (x + (0.8 * width)), (y - 1) ],
     };
     const sideCheckData = {
-      bottom: { match: "top", newXY: [ null,(y+height+3) ], refNames: ['bBL', 'bBR'] },
-      left: { match: "right", newXY: [ (x-width-3), null ], refNames: ['lBL', 'lTL'] },
-      right: { match: "left", newXY: [ (x+width+3), null ], refNames: ['rBR', 'rTR'] },
-      top: { match: "bottom", newXY: [ null,(y-height-3) ], refNames: ['tTL', 'tTR'] }
+      bottom: { newXY: [ null,(y+height+3) ], refNames: ['bBL', 'bBR'] },
+      left: { newXY: [ (x-width-3), null ], refNames: ['lBL', 'lTL'] },
+      right: { newXY: [ (x+width+3), null ], refNames: ['rBR', 'rTR'] },
+      top: { newXY: [ null,(y-height-3) ], refNames: ['tTL', 'tTR'] }
     };
     const tilesOnCenter = document.elementsFromPoint( ...refPoints['center'] );
 
@@ -77,8 +56,13 @@ class Tile extends Component {
       tilesOnRef1 = tilesOnRef1.filter( (tile1, i1) => {
         let i2 = tilesOnRef2.indexOf( tile1 );
         if ( i2 >= 0 ) {
-          if (tilesOnCenter.includes( tile1 )) { this.shove(tile1, ...newXY) }
-          else { this.join(tile1, sideCheckData[side].match) }
+
+          if (tilesOnCenter.includes( tile1 )) {
+            this.shove(tile1, ...newXY)
+          }
+          else if ( tile1.classList.contains('tile') ) {
+            this.join(tile, tile1.parentNode, side)
+          }
 
           tilesOnRef2.splice(i2, 1);
           return false;
@@ -116,9 +100,66 @@ class Tile extends Component {
     ctx.drawImage(image, x, y, dx, dy, 0, 0, 300, 150);
   }
 
-  join( tile, direction) {
-    console.log(tile)
-    this.props.delete(tile.id)
+  join( moveTile, joinGroup, direction) {
+    let referenceCol = parseInt( moveTile.style.gridColumn );
+    let referenceRow = parseInt( moveTile.style.gridRow );
+    let [x, y] = moveTile.id.split(",").map( (num) => parseInt(num) );
+    console.log(this.tiles, referenceCol, referenceRow, x, y)
+    console.log(joinGroup.children)
+    for (let i = 0; i < joinGroup.children.length; i++) {
+      let tile = joinGroup.children.item(i);
+      let [xPrime, yPrime] = tile.id.split(",").map( (num) => parseInt(num) );
+      let [relativePosX, relativePosY] = [x - xPrime, y - yPrime];
+
+      console.log( relativePosX, relativePosY)
+      let newCol = relativePosX - referenceCol;
+      let newRow = relativePosY - referenceRow;
+      console.log(tile, newCol, newRow)
+
+      while (newCol < 0) {
+        this.tiles.forEach( row => row.unshift( null ) )
+        newCol++;
+        referenceCol++;
+      }
+
+      while (newRow < 0) {
+        let emptyRow = new Array(this.tiles[0].length).fill(null);
+        this.tiles.unshift(emptyRow);
+        newRow++;
+        referenceRow++;
+      }
+
+      while (newCol > this.tiles[0].length) {
+        this.tiles.forEach( row => row.push( null ) )
+      }
+
+      while (newRow > this.tiles.length) {
+        let emptyRow = new Array(this.tiles[0].length).fill(null);
+        this.tiles.push(emptyRow);
+      }
+
+      this.tiles[newRow][newCol] = tile;
+      console.log(this.grouping.current.append)
+      this.grouping.current.append(tile)
+      this.unregister(tile);
+      dragmove(
+        this.grouping.current,
+        tile,
+        () => this.grouping.current.style.zIndex = 1,
+        (grouping, htile, x, y) => {
+          this.checkMatch(grouping.offsetHeight, grouping.offsetWidth, x, y, htile);
+          this.grouping.current.style.zIndex = 0;
+        }
+      )
+    }
+
+    this.canvas.current.style.gridColumn = referenceCol;
+    this.canvas.current.style.gridRow = referenceRow;
+
+    console.log(this.tiles)
+    this.updateGrid( this.tiles );
+    this.tiles = this.tiles;
+    this.props.delete(joinGroup.id)
   }
 
   shove(tile, newX, newY) {
@@ -140,31 +181,50 @@ class Tile extends Component {
     }
   }
 
-  tileGrid( {tiles} ) {
-    for (let y = 0; y < tiles.length; y++) {
-      for (let x = 0; x < tiles[0].length; x++) {
-
+  updateGrid( tiles ) {
+    for (let row = 0; row < tiles.length; row++) {
+      for (let col = 0; col < tiles[0].length; col++) {
+        if (tiles[row][col] !== null) {
+          console.log(tiles[row][col], row, col)
+          tiles[row][col].style.gridColumn = col + 1;
+          tiles[row][col].style.gridRow = row + 1;
+        }
       }
     }
+    this.grouping.current.style.gridTemplateColumns = tiles[0].length;
+    this.grouping.current.style.gridTemplateRows = tiles.length;
+    this.grouping.current.style.height = (tiles.length * 100) + "px";
+    this.grouping.current.style.width = (tiles[0].length * 100) + "px";
   }
 
   render() {
-    let [x, y] = this.coordinates;
+    let [x, y] = this.props.coordinates.split(",").map( (num) => parseInt(num) );
     return (
       <div
         className="canvas-grouping"
         data-drag-boundary='true'
         data-will-move='false'
         data-grouped={false}
-        id={this.props.coordinates.split(",").join("-")}
+        id={`${x}-${y}`}
         ref={this.grouping}
         style={{
           display: "grid",
-          gridTemplateColumns: `${this.state.dimensionX}`,
-          gridTemplateRows: `${this.state.dimensionY}`
-        }}
-      >
-        {this.state.tiles}
+          gridTemplateColumns: "1",
+          gridTemplateRows: "1"
+        }}>
+        <canvas
+          className="tile"
+          data-bottom={`${x},${y + 1}`}
+          data-left={`${x - 1},${y}`}
+          data-right={`${x + 1},${y}`}
+          data-top={`${x},${y - 1}`}
+          id={this.props.coordinates}
+          ref={this.canvas}
+          style={{
+            gridColumn: '1',
+            gridRow: '1'
+          }}>
+        </canvas>
       </div>
     );
   }
