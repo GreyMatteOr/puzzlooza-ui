@@ -16,17 +16,22 @@ class Tile extends Component {
     this.unregister = dragmove(
       this.grouping.current,
       this.canvas.current,
-      () => this.grouping.current.style.zIndex = 1,
+      () => this.grouping.current.style.zIndex = 2,
       (grouping, tile, x, y) => {
         if (isNaN(x)) x = 1;
         if (isNaN(y)) y = 1;
         this.grouping.current.style.zIndex = 0;
-        this.checkMatch(tile.offsetHeight, tile.offsetWidth, x, y, tile);
+        this.checkMatch( tile, x, y );
       }
     );
   }
 
-  checkMatch = ( height, width, x, y, tile ) => {
+  checkMatch = ( tile, groupX, groupY) => {
+    console.log(tile, tile.style)
+    let height = tile.offsetHeight;
+    let width = tile.offsetWidth;
+    let x = groupX + ( (parseInt(tile.style.gridColumn) - 1) * width );
+    let y = groupY + ( (parseInt(tile.style.gridRow) - 1) * height );
     const sides = ['bottom', 'left', 'right', 'top'];
     const refPoints = {
       'bBL':  [ (x + (0.2 * width)), (y + (height + 3)) ],
@@ -67,7 +72,7 @@ class Tile extends Component {
             this.grouping.current.id !== tile1.parentNode.id &&
             tile.dataset[side] === tile1.id
            ) {
-            this.join(tile, tile1.parentNode, side)
+            this.join(tile, tile1.parentNode)
           }
 
           tilesOnRef2.splice(i2, 1);
@@ -106,7 +111,7 @@ class Tile extends Component {
     ctx.drawImage(image, x, y, dx, dy, 0, 0, 300, 150);
   }
 
-  join( moveTile, joinGroup, direction) {
+  join( moveTile, joinGroup) {
     let referenceCol = parseInt( moveTile.style.gridColumn );
     let referenceRow = parseInt( moveTile.style.gridRow );
     let [x, y] = moveTile.id.split(",").map( (num) => parseInt(num) );
@@ -145,7 +150,7 @@ class Tile extends Component {
         tile,
         () => this.grouping.current.style.zIndex = 1,
         (grouping, htile, x, y) => {
-          this.checkMatch(grouping.offsetHeight, grouping.offsetWidth, x, y, htile);
+          this.checkMatch( htile, x, y );
           this.grouping.current.style.zIndex = 0;
         }
       )
