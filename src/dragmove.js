@@ -88,10 +88,8 @@ export const dragmove = function(target, handler, onStart, onEnd) {
     target.style.top = lastY + "px";
   };
 
-  return function(handler) {
-    console.log(_callbacks)
+  return function unregister(handler) {
     handler.removeEventListener("mousedown", handleMouseDown);
     delete _callbacks[handler.id]
-    console.log(_callbacks)
   }
 }
