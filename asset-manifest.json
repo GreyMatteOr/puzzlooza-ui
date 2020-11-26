@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/puzzlooza-ui/static/css/main.9aedcaf8.chunk.css",
+    "main.js": "/puzzlooza-ui/static/js/main.7493795f.chunk.js",
+    "main.js.map": "/puzzlooza-ui/static/js/main.7493795f.chunk.js.map",
+    "runtime-main.js": "/puzzlooza-ui/static/js/runtime-main.f40a7217.js",
+    "runtime-main.js.map": "/puzzlooza-ui/static/js/runtime-main.f40a7217.js.map",
+    "static/js/2.dfecbf26.chunk.js": "/puzzlooza-ui/static/js/2.dfecbf26.chunk.js",
+    "static/js/2.dfecbf26.chunk.js.map": "/puzzlooza-ui/static/js/2.dfecbf26.chunk.js.map",
+    "index.html": "/puzzlooza-ui/index.html",
+    "static/css/main.9aedcaf8.chunk.css.map": "/puzzlooza-ui/static/css/main.9aedcaf8.chunk.css.map",
+    "static/js/2.dfecbf26.chunk.js.LICENSE.txt": "/puzzlooza-ui/static/js/2.dfecbf26.chunk.js.LICENSE.txt",
+    "static/media/rainbow.ccc2084b.jpg": "/puzzlooza-ui/static/media/rainbow.ccc2084b.jpg",
+    "static/media/App.css": "/puzzlooza-ui/static/media/table.3689194d.jpg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.f40a7217.js",
+    "static/js/2.dfecbf26.chunk.js",
+    "static/css/main.9aedcaf8.chunk.css",
+    "static/js/main.7493795f.chunk.js"
+  ]
+}
