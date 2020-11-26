@@ -10,6 +10,7 @@ class Puzzle extends Component {
       loadingPicture: true,
       tiles: {}
     }
+    this.tileCombiners = {};
     this.tileRefs = {};
   }
 
@@ -39,6 +40,7 @@ class Puzzle extends Component {
             delete={this.delete}
             dx={dx}
             dy={dy}
+            funcElevator={this.saveTileCombiner}
             image={puzzleImg}
             groupRef={ref}
             key={`${x},${y}`}
@@ -52,7 +54,6 @@ class Puzzle extends Component {
   }
 
   delete = (groupID) => {
-    console.log('DELETE')
     let newTiles = { ...this.state.tiles}
     delete newTiles[groupID]
     this.setState( {tiles: newTiles} )
@@ -65,13 +66,18 @@ class Puzzle extends Component {
         loadingPicture: false,
       }
     )
-    console.log(this.tileRefs)
+    this.props.client.on('combine', (group1ID, group2ID, joinTileID) => this.combineGroups(group1ID, group2ID, joinTileID));
     this.props.client.on('move', (groupID, newX, newY) => this.moveGroup(groupID, newX, newY));
+  }
+
+  combineGroups = (group1ID, group2ID, joinTileID) => {
+    let combiner = this.tileCombiners[group1ID];
+    let joinFrom = this.tileRefs[group2ID];
+    combiner(document.getElementById( joinTileID ), joinFrom.current, false);
   }
 
   moveGroup = (groupID, newX, newY) => {
     let group = this.tileRefs[groupID];
-    console.log(group)
     group.current.style.left = newX;
     group.current.style.top = newY;
   }
@@ -94,6 +100,9 @@ class Puzzle extends Component {
     )
   }
 
+  saveTileCombiner = (groupID, combiner) => {
+    this.tileCombiners[groupID] = combiner;
+  }
 }
 
 export default Puzzle;

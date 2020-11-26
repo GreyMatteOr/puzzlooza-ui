@@ -11,15 +11,15 @@ class Tile extends Component {
   }
 
   componentDidMount() {
-    this.tiles.push([this.canvas.current]);
     this.drawTile(this.canvas.current);
+    this.props.funcElevator(this.grouping.current.id, this.join);
+    this.tiles.push([this.canvas.current]);
     this.unregister = dragmove(
       this.grouping.current,
       this.canvas.current,
       this.props.client,
       () => this.grouping.current.style.zIndex = 2,
       (grouping, handlerTile, x, y) => {
-        console.log(handlerTile)
         if (isNaN(x)) x = 1;
         if (isNaN(y)) y = 1;
         this.grouping.current.style.zIndex = 0;
@@ -110,7 +110,8 @@ class Tile extends Component {
     ctx.drawImage(image, x, y, dx, dy, 0, 0, 300, 150);
   }
 
-  join( moveTile, joinGroup) {
+  join = ( moveTile, joinGroup, emit = true ) => {
+    if (emit) this.props.client.emit('combine', this.grouping.current.id, joinGroup.id, moveTile.id);
     let referenceCol = parseInt( moveTile.style.gridColumn );
     let referenceRow = parseInt( moveTile.style.gridRow );
     let startX = parseInt( moveTile.parentNode.style.left );
