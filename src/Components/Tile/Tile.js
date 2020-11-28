@@ -206,6 +206,7 @@ class Tile extends Component {
       <div
         className="canvas-grouping"
         data-drag-boundary='true'
+        data-rotation={0}
         id={`${x}-${y}`}
         ref={this.grouping}
         style={{
@@ -219,7 +220,6 @@ class Tile extends Component {
           data-left={`${x - 1},${y}`}
           data-right={`${x + 1},${y}`}
           data-top={`${x},${y - 1}`}
-          data-rotation={0}
           id={this.props.coordinates}
           ref={this.canvas}
           style={{

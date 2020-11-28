@@ -105,9 +105,19 @@ export const dragmove = function(target, handler, client, onStart, onEnd) {
   }
 }
 
-function rotate(element, rotation) {
-  if (element.parentNode.children.length === 1 && element.classList.contains('tile')) {
+function rotate(tile, rotation) {
+  if (tile.classList.contains('tile')) {
+    let transformations = {
+      0: 'top-is-up',
+      1: 'top-is-right',
+      2: 'top-is-down',
+      3: 'top-is-left'
+    }
+    let element = tile.parentNode;
+    element.classList.remove( transformations[element.dataset.rotation] )
+    console.log(element.classList)
     element.dataset.rotation = ( ( parseInt( element.dataset.rotation ) + rotation ) + 4 ) % 4;
-    console.log(element.dataset.rotation)
+    element.classList.add( transformations[element.dataset.rotation] )
+    console.log(element.classList)
   }
 }

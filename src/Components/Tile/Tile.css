@@ -10,3 +10,19 @@
   width: 100px;
   z-index: 1;
 }
+
+.top-is-right {
+  transform: rotate(90deg);
+}
+
+.top-is-down {
+  transform: rotate(180deg);
+}
+
+.top-is-left {
+  transform: rotate(270deg);
+}
+
+.top-is-up {
+  transform: rotate(0deg);
+}
