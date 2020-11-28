@@ -70,7 +70,8 @@ class Tile extends Component {
           else if (
             tile1.classList.contains('tile') &&
             this.grouping.current.id !== tile1.parentNode.id &&
-            tile.dataset[side] === tile1.id
+            getRotatedSide(tile, side) === tile1.id &&
+            reduceRotationNumber(tile.parentNode.dataset.rotation) === reduceRotationNumber(tile1.parentNode.dataset.rotation)
            ) {
             this.join(tile, tile1.parentNode)
           }
@@ -230,6 +231,19 @@ class Tile extends Component {
       </div>
     );
   }
+}
+
+function getRotatedSide(tile, side) {
+  let conversion = {bottom:2, left:1, right:3, top:0}[side]
+  let dir = reduceRotationNumber( parseInt( tile.parentNode.dataset.rotation ) + conversion )
+  let realSide = {0:'top', 1:'left', 2:'bottom', 3:'right'}[dir]
+  console.log(dir, realSide)
+  return tile.dataset[realSide]
+}
+
+function reduceRotationNumber(rnum) {
+  rnum = parseInt(rnum)
+  return (((rnum % 4) + 4) % 4)
 }
 
 export default Tile;
