@@ -3,26 +3,11 @@
   width: 100px;
   position: fixed;
   z-index: 0;
+  transition: transform .4s;
 }
 
 .tile {
   height: 100px;
   width: 100px;
   z-index: 1;
-}
-
-.top-is-right {
-  transform: rotate(90deg);
-}
-
-.top-is-down {
-  transform: rotate(180deg);
-}
-
-.top-is-left {
-  transform: rotate(270deg);
-}
-
-.top-is-up {
-  transform: rotate(0deg);
 }
