@@ -1,9 +1,12 @@
 // https://github.com/knadh/dragmove.js
 // Kailash Nadh (c) 2020.
+// Modified by Matthew Lane 2020.
 // MIT License.
 
 let _loaded = false;
+let _mouseLoc = [0,0]
 let _callbacks = {};
+let _rotationCB = {};
 const _isTouch = window.ontouchstart !== undefined;
 
 export const dragmove = function(target, handler, client, onStart, onEnd) {
@@ -15,10 +18,18 @@ export const dragmove = function(target, handler, client, onStart, onEnd) {
         c = e.touches[0];
       }
 
+      // On mouse move, save the last coordinates
+      _mouseLoc = [c.clientX, c.clientY]
+
       // On mouse move, dispatch the coords to all registered callbacks.
       Object.entries(_callbacks).forEach( ( [key, func] ) => {
         func(c.clientX, c.clientY);
       })
+    });
+
+    document.addEventListener("keydown", function(e) {
+      if (e.code === "KeyZ") rotate( document.elementFromPoint( ..._mouseLoc ), -1 );
+      if (e.code === "KeyX") rotate( document.elementFromPoint( ..._mouseLoc ), 1 );
     });
   }
 
@@ -28,7 +39,6 @@ export const dragmove = function(target, handler, client, onStart, onEnd) {
 
   // On the first click and hold, record the offset of the pointer in relation
   // to the point of click inside the element.
-
   function handleMouseDown(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -92,5 +102,12 @@ export const dragmove = function(target, handler, client, onStart, onEnd) {
   return function unregister(handler) {
     handler.removeEventListener("mousedown", handleMouseDown);
     delete _callbacks[handler.id]
+  }
+}
+
+function rotate(element, rotation) {
+  if (element.parentNode.children.length === 1 && element.classList.contains('tile')) {
+    element.dataset.rotation = ( ( parseInt( element.dataset.rotation ) + rotation ) + 4 ) % 4;
+    console.log(element.dataset.rotation)
   }
 }
