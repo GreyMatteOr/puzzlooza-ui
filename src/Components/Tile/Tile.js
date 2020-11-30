@@ -32,25 +32,26 @@ class Tile extends Component {
     let height = tile.offsetHeight;
     let width = tile.offsetWidth;
     let col = parseInt(tile.style.gridColumn);
-    let row = parseInt(tile.style.gridRow)
-    let maxCol = Math.ceil( tile.parentNode.offsetWidth / width )
-    let maxRow = Math.ceil( tile.parentNode.offsetHeight / height )
-    let rNum = reduceRotationNumber( tile.parentNode.dataset.rotation )
+    let row = parseInt(tile.style.gridRow);
+    let maxCol = Math.ceil( tile.parentNode.offsetWidth / width );
+    let maxRow = Math.ceil( tile.parentNode.offsetHeight / height );
+    let [ groupXPrime, groupYPrime ] = rotate90Degrees( groupX, groupY, tile.parentNode.offsetHeight, tile.parentNode.offsetWidth );
+    let rNum = reduceRotationNumber( tile.parentNode.dataset.rotation );
     let x = {
       0: groupX + ( (col - 1) * width ),
-      1: groupX + ( (row - 1) * width ),
+      1: groupXPrime + ( (row - 1) * width ),
       2: groupX + ( (maxCol - col) * width ),
-      3: groupX + ( (maxRow - row) * width )
+      3: groupXPrime + ( (maxRow - row) * width )
     }[rNum];
 
     let y = {
       0: groupY + ( (row - 1) * height ),
-      1: groupY + ( (col - 1) * height ),
+      1: groupYPrime + ( (maxCol - col) * height ),
       2: groupY + ( (maxRow - row) * height ),
-      3: groupY + ( (maxCol - col) * height )
+      3: groupYPrime + ( (col - 1) * height )
     }[rNum]
 
-    console.log( rNum, 'x, y', x, y, 'max', maxCol, maxRow)
+    console.log( rNum, 'x, y', x, y )
     const sideCheckData = {
       bottom: { shoveXY: [ null,(y+height+3) ], refNames: ['bBL', 'bBR'] },
       left: { shoveXY: [ (x-width-3), null ], refNames: ['lBL', 'lTL'] },
@@ -80,7 +81,6 @@ class Tile extends Component {
 
       tilesOnRef1 = tilesOnRef1.filter( (tile1, i1) => {
         let i2 = tilesOnRef2.indexOf( tile1 );
-        // console.log(tile, tile1)
         if ( i2 >= 0 ) {
           if (tilesOnCenter.includes( tile1 )) {
             this.shove(tile1, ...shoveXY)
@@ -262,6 +262,16 @@ function getRotatedSide(tile, side) {
 function reduceRotationNumber(rnum) {
   rnum = parseInt(rnum)
   return (((rnum % 4) + 4) % 4)
+}
+
+function rotate90Degrees( x, y, h, w ) {
+  let pointOfRotation = [
+    x + (w / 2),
+    y + (h / 2)
+  ]
+  let xPrime = x - pointOfRotation[0];
+  let yPrime = y - pointOfRotation[1];
+  return [yPrime + pointOfRotation[0], xPrime + pointOfRotation[1] ]
 }
 
 export default Tile;
