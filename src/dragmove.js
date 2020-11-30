@@ -9,7 +9,7 @@ let _callbacks = {};
 let _rotationCB = {};
 const _isTouch = window.ontouchstart !== undefined;
 
-export const dragmove = function(target, handler, client, onStart, onEnd) {
+export const dragmove = function(target, handler, ioClient, onStart, onEnd) {
   // Register a global event to capture mouse moves (once).
   if (!_loaded) {
     document.addEventListener(_isTouch ? "touchmove" : "mousemove", function(e) {
@@ -21,6 +21,7 @@ export const dragmove = function(target, handler, client, onStart, onEnd) {
       // On mouse move, save the last coordinates
       _mouseLoc = [c.clientX, c.clientY]
 
+      ioClient.on('rotate', rotate);
       // On mouse move, dispatch the coords to all registered callbacks.
       Object.entries(_callbacks).forEach( ( [key, func] ) => {
         func(c.clientX, c.clientY);
@@ -28,8 +29,8 @@ export const dragmove = function(target, handler, client, onStart, onEnd) {
     });
 
     document.addEventListener("keydown", function(e) {
-      if (e.code === "KeyZ") rotate( document.elementFromPoint( ..._mouseLoc ), -1 );
-      if (e.code === "KeyX") rotate( document.elementFromPoint( ..._mouseLoc ), 1 );
+      if (e.code === "KeyZ") rotate( document.elementFromPoint( ..._mouseLoc ).id, 1, ioClient );
+      if (e.code === "KeyX") rotate( document.elementFromPoint( ..._mouseLoc ).id, -1, ioClient );
     });
   }
 
@@ -96,7 +97,7 @@ export const dragmove = function(target, handler, client, onStart, onEnd) {
 
     target.style.left = lastX + "px";
     target.style.top = lastY + "px";
-    client.emit('move', target.id ,lastX + "px", lastY + "px")
+    ioClient.emit('move', target.id ,lastX + "px", lastY + "px")
   };
 
   return function unregister(handler) {
@@ -105,10 +106,12 @@ export const dragmove = function(target, handler, client, onStart, onEnd) {
   }
 }
 
-function rotate(tile, rotation) {
-  if (tile.classList.contains('tile')) {
+function rotate(tileID, rotation, ioClient) {
+  let tile = document.getElementById(tileID)
+  if (tile && tile.classList.contains('tile')) {
+    if (ioClient) ioClient.emit( 'rotate', tileID, rotation )
     let element = tile.parentNode;
-    element.dataset.rotation = parseInt( element.dataset.rotation ) + rotation;
-    element.style.transform = `rotate(${element.dataset.rotation * 90}deg)`
+    element.dataset.rotation = parseInt( element.dataset.rotation ) + rotation
+    element.style.transform = `rotate(${element.dataset.rotation * -90}deg)`
   }
 }

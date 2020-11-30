@@ -31,8 +31,26 @@ class Tile extends Component {
   checkMatch = ( tile, groupX, groupY) => {
     let height = tile.offsetHeight;
     let width = tile.offsetWidth;
-    let x = groupX + ( (parseInt(tile.style.gridColumn) - 1) * width );
-    let y = groupY + ( (parseInt(tile.style.gridRow) - 1) * height );
+    let col = parseInt(tile.style.gridColumn);
+    let row = parseInt(tile.style.gridRow)
+    let maxCol = Math.ceil( tile.parentNode.offsetWidth / width )
+    let maxRow = Math.ceil( tile.parentNode.offsetHeight / height )
+    let rNum = reduceRotationNumber( tile.parentNode.dataset.rotation )
+    let x = {
+      0: groupX + ( (col - 1) * width ),
+      1: groupX + ( (row - 1) * width ),
+      2: groupX + ( (maxCol - col) * width ),
+      3: groupX + ( (maxRow - row) * width )
+    }[rNum];
+
+    let y = {
+      0: groupY + ( (row - 1) * height ),
+      1: groupY + ( (col - 1) * height ),
+      2: groupY + ( (maxRow - row) * height ),
+      3: groupY + ( (maxCol - col) * height )
+    }[rNum]
+
+    console.log( rNum, 'x, y', x, y, 'max', maxCol, maxRow)
     const sideCheckData = {
       bottom: { shoveXY: [ null,(y+height+3) ], refNames: ['bBL', 'bBR'] },
       left: { shoveXY: [ (x-width-3), null ], refNames: ['lBL', 'lTL'] },
@@ -62,7 +80,7 @@ class Tile extends Component {
 
       tilesOnRef1 = tilesOnRef1.filter( (tile1, i1) => {
         let i2 = tilesOnRef2.indexOf( tile1 );
-
+        // console.log(tile, tile1)
         if ( i2 >= 0 ) {
           if (tilesOnCenter.includes( tile1 )) {
             this.shove(tile1, ...shoveXY)
@@ -71,8 +89,9 @@ class Tile extends Component {
             tile1.classList.contains('tile') &&
             this.grouping.current.id !== tile1.parentNode.id &&
             getRotatedSide(tile, side) === tile1.id &&
-            reduceRotationNumber(tile.parentNode.dataset.rotation) === reduceRotationNumber(tile1.parentNode.dataset.rotation)
+            reduceRotationNumber(rNum) === reduceRotationNumber(tile1.parentNode.dataset.rotation)
            ) {
+             console.log('JOIN', x, y )
             this.join(tile, tile1.parentNode)
           }
           tilesOnRef2.splice(i2, 1);
@@ -234,10 +253,9 @@ class Tile extends Component {
 }
 
 function getRotatedSide(tile, side) {
-  let conversion = {bottom:2, left:1, right:3, top:0}[side]
+  let conversion = {bottom:2, left:3, right:1, top:0}[side]
   let dir = reduceRotationNumber( parseInt( tile.parentNode.dataset.rotation ) + conversion )
-  let realSide = {0:'top', 1:'left', 2:'bottom', 3:'right'}[dir]
-  console.log(dir, realSide)
+  let realSide = {0:'top', 1:'right', 2:'bottom', 3:'left'}[dir]
   return tile.dataset[realSide]
 }
 
