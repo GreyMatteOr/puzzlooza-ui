@@ -1,12 +1,15 @@
 // https://github.com/knadh/dragmove.js
 // Kailash Nadh (c) 2020.
+// Modified by Matthew Lane 2020.
 // MIT License.
 
 let _loaded = false;
+let _mouseLoc = [0,0]
 let _callbacks = {};
+let _rotationCB = {};
 const _isTouch = window.ontouchstart !== undefined;
 
-export const dragmove = function(target, handler, onStart, onEnd) {
+export const dragmove = function(target, handler, ioClient, onStart, onEnd) {
   // Register a global event to capture mouse moves (once).
   if (!_loaded) {
     document.addEventListener(_isTouch ? "touchmove" : "mousemove", function(e) {
@@ -15,10 +18,19 @@ export const dragmove = function(target, handler, onStart, onEnd) {
         c = e.touches[0];
       }
 
+      // On mouse move, save the last coordinates
+      _mouseLoc = [c.clientX, c.clientY]
+
       // On mouse move, dispatch the coords to all registered callbacks.
       Object.entries(_callbacks).forEach( ( [key, func] ) => {
         func(c.clientX, c.clientY);
       })
+    });
+    ioClient.on('rotate', rotate);
+
+    document.addEventListener("keydown", function(e) {
+      if (e.code === "KeyZ") rotate( document.elementFromPoint( ..._mouseLoc ).id, 1, ioClient );
+      if (e.code === "KeyX") rotate( document.elementFromPoint( ..._mouseLoc ).id, -1, ioClient );
     });
   }
 
@@ -28,7 +40,6 @@ export const dragmove = function(target, handler, onStart, onEnd) {
 
   // On the first click and hold, record the offset of the pointer in relation
   // to the point of click inside the element.
-
   function handleMouseDown(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -86,10 +97,21 @@ export const dragmove = function(target, handler, onStart, onEnd) {
 
     target.style.left = lastX + "px";
     target.style.top = lastY + "px";
+    ioClient.emit('move', target.id ,lastX + "px", lastY + "px")
   };
 
   return function unregister(handler) {
     handler.removeEventListener("mousedown", handleMouseDown);
     delete _callbacks[handler.id]
+  }
+}
+
+function rotate(tileID, rotation, ioClient) {
+  let tile = document.getElementById(tileID)
+  if (tile && tile.classList.contains('tile')) {
+    if (ioClient) ioClient.emit( 'rotate', tileID, rotation )
+    let element = tile.parentNode;
+    element.dataset.rotation = parseInt( element.dataset.rotation ) + rotation
+    element.style.transform = `rotate(${element.dataset.rotation * -90}deg)`
   }
 }

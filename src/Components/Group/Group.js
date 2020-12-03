@@ -1,27 +1,29 @@
 import { dragmove } from "../../dragmove";
 import React, { Component } from "react";
-import "./Tile.css";
+import "./Group.css";
 
-class Tile extends Component {
+class Group extends Component {
   constructor(props) {
     super(props);
     this.canvas = React.createRef();
-    this.grouping = React.createRef();
+    this.grouping = this.props.groupRef;
     this.tiles = [];
   }
 
   componentDidMount() {
-    this.tiles.push([this.canvas.current]);
     this.drawTile(this.canvas.current);
+    this.props.funcElevator(this.grouping.current.id, this.join);
+    this.tiles.push([this.canvas.current]);
     this.unregister = dragmove(
       this.grouping.current,
       this.canvas.current,
+      this.props.client,
       () => this.grouping.current.style.zIndex = 2,
-      (grouping, tile, x, y) => {
+      (grouping, handlerTile, x, y) => {
         if (isNaN(x)) x = 1;
         if (isNaN(y)) y = 1;
         this.grouping.current.style.zIndex = 0;
-        this.checkMatch( tile, x, y );
+        this.checkMatch( handlerTile, x, y );
       }
     );
   }
@@ -29,8 +31,26 @@ class Tile extends Component {
   checkMatch = ( tile, groupX, groupY) => {
     let height = tile.offsetHeight;
     let width = tile.offsetWidth;
-    let x = groupX + ( (parseInt(tile.style.gridColumn) - 1) * width );
-    let y = groupY + ( (parseInt(tile.style.gridRow) - 1) * height );
+    let col = parseInt(tile.style.gridColumn);
+    let row = parseInt(tile.style.gridRow);
+    let maxCol = Math.ceil( tile.parentNode.offsetWidth / width );
+    let maxRow = Math.ceil( tile.parentNode.offsetHeight / height );
+    let [ groupXPrime, groupYPrime ] = rotate90Degrees( groupX, groupY, tile.parentNode.offsetHeight, tile.parentNode.offsetWidth );
+    let rNum = reduceRotationNumber( tile.parentNode.dataset.rotation );
+
+    let x = {
+      0: groupX + ( (col - 1) * width ),
+      1: groupXPrime + ( (row - 1) * width ),
+      2: groupX + ( (maxCol - col) * width ),
+      3: groupXPrime + ( (maxRow - row) * width )
+    }[rNum];
+    let y = {
+      0: groupY + ( (row - 1) * height ),
+      1: groupYPrime + ( (maxCol - col) * height ),
+      2: groupY + ( (maxRow - row) * height ),
+      3: groupYPrime + ( (col - 1) * height )
+    }[rNum]
+
     const sideCheckData = {
       bottom: { shoveXY: [ null,(y+height+3) ], refNames: ['bBL', 'bBR'] },
       left: { shoveXY: [ (x-width-3), null ], refNames: ['lBL', 'lTL'] },
@@ -60,7 +80,6 @@ class Tile extends Component {
 
       tilesOnRef1 = tilesOnRef1.filter( (tile1, i1) => {
         let i2 = tilesOnRef2.indexOf( tile1 );
-
         if ( i2 >= 0 ) {
           if (tilesOnCenter.includes( tile1 )) {
             this.shove(tile1, ...shoveXY)
@@ -68,7 +87,8 @@ class Tile extends Component {
           else if (
             tile1.classList.contains('tile') &&
             this.grouping.current.id !== tile1.parentNode.id &&
-            tile.dataset[side] === tile1.id
+            getRotatedSide(tile, side) === tile1.id &&
+            reduceRotationNumber(rNum) === reduceRotationNumber(tile1.parentNode.dataset.rotation)
            ) {
             this.join(tile, tile1.parentNode)
           }
@@ -108,7 +128,8 @@ class Tile extends Component {
     ctx.drawImage(image, x, y, dx, dy, 0, 0, 300, 150);
   }
 
-  join( moveTile, joinGroup) {
+  join = ( moveTile, joinGroup, emit = true ) => {
+    if (emit) this.props.client.emit('combine', this.grouping.current.id, joinGroup.id, moveTile.id);
     let referenceCol = parseInt( moveTile.style.gridColumn );
     let referenceRow = parseInt( moveTile.style.gridRow );
     let startX = parseInt( moveTile.parentNode.style.left );
@@ -145,9 +166,10 @@ class Tile extends Component {
       dragmove(
         this.grouping.current,
         tile,
+        this.props.client,
         () => this.grouping.current.style.zIndex = 1,
-        (grouping, htile, x, y) => {
-          this.checkMatch( htile, x, y );
+        (grouping, handlerTile, x, y) => {
+          this.checkMatch( handlerTile, x, y );
           this.grouping.current.style.zIndex = 0;
         }
       )
@@ -202,6 +224,7 @@ class Tile extends Component {
       <div
         className="canvas-grouping"
         data-drag-boundary='true'
+        data-rotation={0}
         id={`${x}-${y}`}
         ref={this.grouping}
         style={{
@@ -227,4 +250,26 @@ class Tile extends Component {
   }
 }
 
-export default Tile;
+function getRotatedSide(tile, side) {
+  let conversion = {bottom:2, left:3, right:1, top:0}[side]
+  let dir = reduceRotationNumber( parseInt( tile.parentNode.dataset.rotation ) + conversion )
+  let realSide = {0:'top', 1:'right', 2:'bottom', 3:'left'}[dir]
+  return tile.dataset[realSide]
+}
+
+function reduceRotationNumber(rnum) {
+  rnum = parseInt(rnum)
+  return (((rnum % 4) + 4) % 4)
+}
+
+function rotate90Degrees( x, y, h, w ) {
+  let pointOfRotation = [
+    x + (w / 2),
+    y + (h / 2)
+  ]
+  let xPrime = x - pointOfRotation[0];
+  let yPrime = y - pointOfRotation[1];
+  return [yPrime + pointOfRotation[0], xPrime + pointOfRotation[1] ]
+}
+
+export default Group;

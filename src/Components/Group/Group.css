@@ -3,6 +3,7 @@
   width: 100px;
   position: fixed;
   z-index: 0;
+  transition: transform .4s;
 }
 
 .tile {

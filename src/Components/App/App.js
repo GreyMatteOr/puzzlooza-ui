@@ -8,21 +8,24 @@ let client;
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {connected: false};
   }
 
-  componentDidMount() {
-    client = ioc.connect( "localhost:3001");
+  componentDidMount = () => {
+    // client = ioc.connect( "localhost:3003");
+    client = ioc.connect( "https://puzzlooza.herokuapp.com/" );
     console.log('Attempting to connect...')
     client.on( 'connect', (state) => {
-      console.log('Connected to server.');
+      console.log('Connected to server. ID:', client.id);
+      this.setState( {connected: true} )
     });
   }
 
   render() {
+    if (!this.state.connected) return <h1>Connecting to server...</h1>
     return (
       <div className="App">
-        <Puzzle />
+        <Puzzle client={client}/>
       </div>
     );
   }
