@@ -1,26 +1,27 @@
 import React, { Component } from 'react';
 import './Puzzle.css';
 import rainbow from '../../rainbow.jpg';
-import Tile from '../Tile/Tile.js';
+import Group from '../Group/Group.js';
 
 class Puzzle extends Component {
   constructor(props) {
     super(props);
     this.state = {
       loadingPicture: true,
-      tiles: {}
+      loadingRoom: true,
+      groups: {}
     }
-    this.tileCombiners = {};
-    this.tileRefs = {};
+    this.groupCombiners = {};
+    this.groupRefs = {};
   }
 
-  createTiles = (xSplits, ySplits, puzzleImg) => {
+  createGroups = (xSplits, ySplits, puzzleImg) => {
     let {width, height} = puzzleImg;
     let dx = Math.floor( width / xSplits );
     let dy = Math.floor( height / ySplits );
     let xLeftover = width % dx
     let yLeftover = height % dy
-    let xOffset, yOffset, tiles = {};
+    let xOffset, yOffset, groups = {};
     for (let y = 0; y < ySplits; y++) {
       for (let x = 0; x < xSplits; x++) {
         let ref = React.createRef();
@@ -32,15 +33,15 @@ class Puzzle extends Component {
           yOffset = y;
           yLeftover--;
         }
-        this.tileRefs[`${x}-${y}`] = ref;
-        tiles[`${x}-${y}`] = (
-          <Tile
+        this.groupRefs[`${x}-${y}`] = ref;
+        groups[`${x}-${y}`] = (
+          <Group
             client={this.props.client}
             coordinates={`${x},${y}`}
             delete={this.delete}
             dx={dx}
             dy={dy}
-            funcElevator={this.saveTileCombiner}
+            funcElevator={this.saveGroupCombiner}
             image={puzzleImg}
             groupRef={ref}
             key={`${x},${y}`}
@@ -50,36 +51,78 @@ class Puzzle extends Component {
         )
       }
     }
-    this.setState( {tiles} );
+    this.setState( {groups} );
   }
 
   delete = (groupID) => {
-    let newTiles = { ...this.state.tiles}
-    delete newTiles[groupID]
-    this.setState( {tiles: newTiles} )
+    let newGroups = { ...this.state.groups}
+    delete newGroups[groupID]
+    delete this.groupRefs[groupID]
+    this.setState( {groups: newGroups} )
   }
 
   doneLoadingPic = (e) => {
-    this.createTiles(9, 6, e.target);
-    this.setState(
-      {
-        loadingPicture: false,
-      }
-    )
-    this.props.client.on('combine', (group1ID, group2ID, joinTileID) => this.combineGroups(group1ID, group2ID, joinTileID));
-    this.props.client.on('move', (groupID, newX, newY) => this.moveGroup(groupID, newX, newY));
+    this.createGroups(9, 6, e.target);
+    this.setState( {loadingPicture: false} );
+    this.props.client.on('roomData', this.arrangeGroups);
+    this.props.client.on('dataRequest', this.sendData);
+    this.props.client.on('newRoom', () => {
+      console.log('new room!')
+      this.setState( {loadingRoom: false} )
+    })
+    this.props.client.on('combine', this.combineGroups);
+    this.props.client.on('move', this.moveGroup);
+  }
+
+  arrangeGroups = (groups) => {
+    groups.forEach( group => {
+      let node = this.groupRefs[group.groupID].current
+      node.dataset.rotation = group.rotation;
+      node.style.transform = `rotate(${node.dataset.rotation * -90}deg)`
+      node.style.top = group.top;
+      node.style.left = group.left;
+
+      let identity = group.groupID.split('-').join(',');
+      group.tiles.forEach( tileID => {
+        if (tileID === identity) return;
+        let tileParentID = tileID.split(',').join('-');
+        this.combineGroups(group.groupID, tileParentID, identity);
+      });
+    });
+
+    this.setState( {loadingRoom: false} )
   }
 
   combineGroups = (group1ID, group2ID, joinTileID) => {
-    let combiner = this.tileCombiners[group1ID];
-    let joinFrom = this.tileRefs[group2ID];
-    combiner(document.getElementById( joinTileID ), joinFrom.current, false);
+    let combiner = this.groupCombiners[group1ID];
+    let joinFrom = this.groupRefs[group2ID];
+    if (joinFrom) combiner(document.getElementById( joinTileID ), joinFrom.current, false);
+  }
+
+  getRoomData = () => {
+    this.props.client.emit('getRoomData')
+    return <h1>Loading Room Data </h1>
   }
 
   moveGroup = (groupID, newX, newY) => {
-    let group = this.tileRefs[groupID];
+    let group = this.groupRefs[groupID];
     group.current.style.left = newX;
     group.current.style.top = newY;
+  }
+
+  sendData = (requester) => {
+    console.log('Request')
+    let roomData = Object.entries(this.groupRefs).map( ([groupID, group]) => {
+      let tiles = [...group.current.children].map( tile => tile.id )
+      return {
+        groupID,
+        tiles,
+        rotation: group.current.dataset.rotation,
+        top: group.current.style.top,
+        left: group.current.style.left
+      }
+    });
+    this.props.client.emit('returnRoomData', requester, roomData)
   }
 
   render() {
@@ -87,21 +130,25 @@ class Puzzle extends Component {
       let puzzleImg = <img src={rainbow} onLoad={this.doneLoadingPic} />
       return (
         <>
-          <h1>Loading</h1>
+          <h1>Loading Puzzle Tiles</h1>
           {puzzleImg}
         </>
       )
     }
 
+    if (this.state.loadingRoom) {
+      {this.getRoomData()}
+    }
+
     return (
       <>
-        {Object.values( this.state.tiles )}
+        {Object.values( this.state.groups )}
       </>
     )
   }
 
-  saveTileCombiner = (groupID, combiner) => {
-    this.tileCombiners[groupID] = combiner;
+  saveGroupCombiner = (groupID, combiner) => {
+    this.groupCombiners[groupID] = combiner;
   }
 }
 

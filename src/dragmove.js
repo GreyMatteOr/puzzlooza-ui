@@ -21,12 +21,12 @@ export const dragmove = function(target, handler, ioClient, onStart, onEnd) {
       // On mouse move, save the last coordinates
       _mouseLoc = [c.clientX, c.clientY]
 
-      ioClient.on('rotate', rotate);
       // On mouse move, dispatch the coords to all registered callbacks.
       Object.entries(_callbacks).forEach( ( [key, func] ) => {
         func(c.clientX, c.clientY);
       })
     });
+    ioClient.on('rotate', rotate);
 
     document.addEventListener("keydown", function(e) {
       if (e.code === "KeyZ") rotate( document.elementFromPoint( ..._mouseLoc ).id, 1, ioClient );
@@ -107,6 +107,7 @@ export const dragmove = function(target, handler, ioClient, onStart, onEnd) {
 }
 
 function rotate(tileID, rotation, ioClient) {
+  console.log('Rotated:', tileID, rotation)
   let tile = document.getElementById(tileID)
   if (tile && tile.classList.contains('tile')) {
     if (ioClient) ioClient.emit( 'rotate', tileID, rotation )

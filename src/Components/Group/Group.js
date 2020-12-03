@@ -1,8 +1,8 @@
 import { dragmove } from "../../dragmove";
 import React, { Component } from "react";
-import "./Tile.css";
+import "./Group.css";
 
-class Tile extends Component {
+class Group extends Component {
   constructor(props) {
     super(props);
     this.canvas = React.createRef();
@@ -11,6 +11,7 @@ class Tile extends Component {
   }
 
   componentDidMount() {
+    console.log('mounted')
     this.drawTile(this.canvas.current);
     this.props.funcElevator(this.grouping.current.id, this.join);
     this.tiles.push([this.canvas.current]);
@@ -37,13 +38,13 @@ class Tile extends Component {
     let maxRow = Math.ceil( tile.parentNode.offsetHeight / height );
     let [ groupXPrime, groupYPrime ] = rotate90Degrees( groupX, groupY, tile.parentNode.offsetHeight, tile.parentNode.offsetWidth );
     let rNum = reduceRotationNumber( tile.parentNode.dataset.rotation );
+
     let x = {
       0: groupX + ( (col - 1) * width ),
       1: groupXPrime + ( (row - 1) * width ),
       2: groupX + ( (maxCol - col) * width ),
       3: groupXPrime + ( (maxRow - row) * width )
     }[rNum];
-
     let y = {
       0: groupY + ( (row - 1) * height ),
       1: groupYPrime + ( (maxCol - col) * height ),
@@ -51,7 +52,6 @@ class Tile extends Component {
       3: groupYPrime + ( (col - 1) * height )
     }[rNum]
 
-    console.log( rNum, 'x, y', x, y )
     const sideCheckData = {
       bottom: { shoveXY: [ null,(y+height+3) ], refNames: ['bBL', 'bBR'] },
       left: { shoveXY: [ (x-width-3), null ], refNames: ['lBL', 'lTL'] },
@@ -274,4 +274,4 @@ function rotate90Degrees( x, y, h, w ) {
   return [yPrime + pointOfRotation[0], xPrime + pointOfRotation[1] ]
 }
 
-export default Tile;
+export default Group;
