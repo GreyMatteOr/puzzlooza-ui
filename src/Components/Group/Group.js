@@ -11,7 +11,6 @@ class Group extends Component {
   }
 
   componentDidMount() {
-    console.log('mounted')
     this.drawTile(this.canvas.current);
     this.props.funcElevator(this.grouping.current.id, this.join);
     this.tiles.push([this.canvas.current]);
@@ -91,7 +90,6 @@ class Group extends Component {
             getRotatedSide(tile, side) === tile1.id &&
             reduceRotationNumber(rNum) === reduceRotationNumber(tile1.parentNode.dataset.rotation)
            ) {
-             console.log('JOIN', x, y )
             this.join(tile, tile1.parentNode)
           }
           tilesOnRef2.splice(i2, 1);

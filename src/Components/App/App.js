@@ -12,8 +12,8 @@ class App extends Component {
   }
 
   componentDidMount = () => {
-    client = ioc.connect( "localhost:3003");
-    // client = ioc.connect( "https://puzzlooza.herokuapp.com/" );
+    // client = ioc.connect( "localhost:3003");
+    client = ioc.connect( "https://puzzlooza.herokuapp.com/" );
     console.log('Attempting to connect...')
     client.on( 'connect', (state) => {
       console.log('Connected to server. ID:', client.id);

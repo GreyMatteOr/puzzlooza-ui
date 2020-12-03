@@ -67,7 +67,6 @@ class Puzzle extends Component {
     this.props.client.on('roomData', this.arrangeGroups);
     this.props.client.on('dataRequest', this.sendData);
     this.props.client.on('newRoom', () => {
-      console.log('new room!')
       this.setState( {loadingRoom: false} )
     })
     this.props.client.on('combine', this.combineGroups);
@@ -111,7 +110,6 @@ class Puzzle extends Component {
   }
 
   sendData = (requester) => {
-    console.log('Request')
     let roomData = Object.entries(this.groupRefs).map( ([groupID, group]) => {
       let tiles = [...group.current.children].map( tile => tile.id )
       return {

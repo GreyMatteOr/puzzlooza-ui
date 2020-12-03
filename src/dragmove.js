@@ -107,7 +107,6 @@ export const dragmove = function(target, handler, ioClient, onStart, onEnd) {
 }
 
 function rotate(tileID, rotation, ioClient) {
-  console.log('Rotated:', tileID, rotation)
   let tile = document.getElementById(tileID)
   if (tile && tile.classList.contains('tile')) {
     if (ioClient) ioClient.emit( 'rotate', tileID, rotation )
