@@ -9,6 +9,8 @@ Merely navigate to [puzzlooza site](https://greymatteor.github.io/puzzlooza-ui/)
 
 To get started on a new puzzle, quickly click-and-release the 'pile' of tiles to randomly push the pieces everywhere!
 
+![puzzlooza_start](https://user-images.githubusercontent.com/65369751/103509051-1a74ab00-4e17-11eb-9947-a18e63f77f34.gif)
+
 If a puzzle is already on-going, the puzzle will load automatically.
 
 ### Features:
