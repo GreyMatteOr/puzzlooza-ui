@@ -2,8 +2,6 @@
 
 **[puzzlooza](https://greymatteor.github.io/puzzlooza-ui/)** is an online app where users from all over the internet might solve a puzzle together. An on-going (?) web-sockets project done in a short time!
 
-If you'd like to begin contributing, checkout the [Project Milestones](https://github.com/GreyMatteOr/puzzlooza-host/milestones).
-
 ### How to start playing
 Merely navigate to [puzzlooza site](https://greymatteor.github.io/puzzlooza-ui/), wait for the server to boot, and begin playing with users anywhere! If the site has been inactive for too long, the server goes to sleep. When this happens, it may take up to 20 seconds to boot again.
 
@@ -32,6 +30,13 @@ If a puzzle is already on-going, the puzzle will load automatically.
  - When pieces are forced partially off-screen, dragging on them doesn't move them until they would be completely returned on screen
  - Some groups block grabbing a visible tile
  - When a puzzle is solved, everyone has to leave the site, or else the puzzle will never reset
+ 
+### Wanna contribute?
+
+- Check-out our roadmap:
+ <img width="1362" alt="Puzzlooza_roadmap" src="https://user-images.githubusercontent.com/65369751/103509422-f6659980-4e17-11eb-883b-0e18df591792.png">
+- Checkout the [Project Milestones](https://github.com/GreyMatteOr/puzzlooza-host/milestones)
+ 
 
 ### Tech:
  - **[dragmove.js](https://github.com/knadh/dragmove.js)**
