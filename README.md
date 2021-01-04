@@ -30,13 +30,13 @@ If a puzzle is already on-going, the puzzle will load automatically.
  - When pieces are forced partially off-screen, dragging on them doesn't move them until they would be completely returned on screen
  - Some groups block grabbing a visible tile
  - When a puzzle is solved, everyone has to leave the site, or else the puzzle will never reset
- 
+
 ### Wanna contribute?
 
-- Check-out our roadmap:
+ - Checkout the [Project Milestones](https://github.com/GreyMatteOr/puzzlooza-host/milestones)
+ - Check-out our roadmap:
  <img width="1362" alt="Puzzlooza_roadmap" src="https://user-images.githubusercontent.com/65369751/103509422-f6659980-4e17-11eb-883b-0e18df591792.png">
-- Checkout the [Project Milestones](https://github.com/GreyMatteOr/puzzlooza-host/milestones)
- 
+
 
 ### Tech:
  - **[dragmove.js](https://github.com/knadh/dragmove.js)**
